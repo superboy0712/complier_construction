@@ -185,6 +185,12 @@ void node_finalize ( node_t *discard )
 	discard->label = NULL;
 	free(discard->children);
 	discard->children = NULL;
+	/* the string const is allocated on heap */
+	if((discard->data_type.base_type == STRING_TYPE)
+		&&(discard->string_const != NULL)){
+			free(discard->string_const);
+	}
+	/*****************************************/
 	free(discard);
 	discard = NULL;
 	/*****************************************/

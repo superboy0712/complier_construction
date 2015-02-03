@@ -186,7 +186,7 @@ variable_list	: declaration_statement
 					{
 						$$ = CN(variable_list_n, 1, $1);
 					}
-				| variable_list ',' expression
+				| variable_list ',' declaration_statement
 					{
 						$$ = CN(variable_list_n, 2, $1, $2); 
 					}
@@ -253,7 +253,7 @@ statement		: declaration_statement ';'
 declaration_statement
 				: type variable
 					{
-						$$ = CN(declaration_statement_n, 1, $1);
+						$$ = CN(declaration_statement_n, 2, $1, $2);
 					}
 				;
 
@@ -351,7 +351,7 @@ expression		: constant
 					{
 						$$ = CNE(expression_n, or_e, 2, $1, $2);
 					}
-				| UMINUS expression
+				| '-' expression %prec UMINUS
 					{
 						$$ = CNE(expression_n, uminus_e, 1, $1);
 					}
@@ -395,67 +395,74 @@ lvalue			: variable
 
 constant		: TRUE_CONST
 					{
-						$$ = CNT(constant_n, )
+						$$ = CNT(constant_n, BOOL_TYPE, 0);// terminals
+						SetInteger($$,"1");
 					}
 				| FALSE_CONST
 					{
-							
+						$$ = CNT(constant_n, BOOL_TYPE, 0);// terminals
+						SetInteger($$,"0");
 					}
 				| INT_CONST
 					{
-							
+						$$ = CNT(constant_n, INT_TYPE, 0);// terminals
+						SetInteger($$, yytext);
 					}
 				| FLOAT_CONST
 					{
-							
+						$$ = CNT(constant_n, FLOAT_TYPE, 0);// terminals
+						SetFloat($$, yytext);
 					}
 				| STRING_CONST
 					{
-							
+						$$ = CNT(constant_n, STRING_TYPE, 0);// terminals
+						SetString($$, yytext);
 					}
 				;
 
 type			: INT
 					{
-							
+						$$ = CN(type_n, 0);
 					}
 				| FLOAT
 					{
-							
+						$$ = CN(type_n, 0);
 					}
 				| BOOL
 					{
-							
+						$$ = CN(type_n, 0);
 					}
 				| VOID
 					{
-							
+						$$ = CN(type_n, 0);
 					}
 				| type ARRAY index_list
 					{
-							
+						/* add a node_type as array declaration n?*/
+						$$ = CN(type_n, 2, $1, $2);
 					}
 				;
 
 index_list		: index_list '[' index ']'
 					{
-							
+						$$ = CN(index_list_n, 2, $1, $2);
 					}
 				| '[' index ']'
 					{
-							
+						$$ = CN(index_list_n, 1, $1);
 					}
 				;
 
 index			: INT_CONST
 					{
-							
+						$$ = CN(index_n, 0);
+						SetInteger($$, yytext);
 					}
 				;
 
 variable		: IDENTIFIER
 					{
-							
+						$$ = CNL(variable_n, yytext, 0);
 					}
 				;
 
