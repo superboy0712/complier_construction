@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.toolchain.gnu.base.48603986/INC/delimiter=\:
+environment/project/cdt.managedbuild.toolchain.gnu.base.48603986/INC/operation=append
+environment/project/cdt.managedbuild.toolchain.gnu.base.48603986/INC/value=./include/
+environment/project/cdt.managedbuild.toolchain.gnu.base.48603986/append=true
+environment/project/cdt.managedbuild.toolchain.gnu.base.48603986/appendContributed=true

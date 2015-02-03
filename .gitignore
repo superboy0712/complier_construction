@@ -29,8 +29,8 @@
 *.hex
 
 #directories
-./bin/
-./obj/
-./testOutput/
-./work/
+/bin
+/obj
+/testOutput
+/work
 

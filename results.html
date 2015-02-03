@@ -1,0 +1,37 @@
+<html>
+<head>
+<title>Test Results</title>
+<style>
+iframe {
+		border-style:solid;
+		border-width:1px;
+	   }
+body {font-family:sans;}
+button {
+	background:none;
+	border:none;
+	}
+button:hover{
+	text-decoration:underline;
+	}
+</style>
+<script>
+myLoad = function(file, stage){
+document.getElementById('diffframe').src = ("testOutput/" + file + "." + stage + ".html")
+document.getElementById('inputframe').src = ("vsl_programs/" + file + ".vsl")
+}
+</script>
+</head>
+
+<body>
+<div style="width:15%;float:left;font-family:sans;">
+<h1>Test Report</h1>
+
+
+The output was incorrect for the following files.
+Click to see difference between your output and the correct output. <br>
+
+<button onClick=myLoad("adding","s2")>adding</button> <br>
+<button onClick=myLoad("adding","s3")>adding</button> <br>
+<button onClick=myLoad("arithmetic_float","s2")>arithmetic_float</button> <br>
+<button onClick=myLoad("arithmetic_float","s3")>arithmetic_float</button> <br>
