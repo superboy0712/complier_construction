@@ -168,7 +168,7 @@ function_list	: function_list function
 					}
 				| epislon
 					{
-						//$$ = CN(function_list_n, 1, $1);
+						$$ = CN(function_list_n, 0);
 					}
 				;
 
