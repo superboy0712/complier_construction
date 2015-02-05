@@ -158,7 +158,7 @@ program			: function_list
 
 function		: type FUNC variable '(' parameter_list ')' START statement_list END	{
 						//$$ = CNL(function_n, $1->label, 3, $1, $2, $3); /* trying to access $1->label results in segment fault! */
-						$$ = CN(function_n, 3, $1, $2, $3);
+						$$ = CN(function_n, 4, $1, $3, $5, $8);
 					}
 				;
 
@@ -468,7 +468,7 @@ variable		: IDENTIFIER
 
 epislon			:
 					{
-							
+						$$ = NULL;	
 					}
 				;
 %% 
