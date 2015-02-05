@@ -423,20 +423,20 @@ type			: INT
 					}
 				| FLOAT
 					{
-						$$ = CN(type_n, 0);
+						$$ = CNT(type_n, FLOAT_TYPE, 0);
 					}
 				| BOOL
 					{
-						$$ = CN(type_n, 0);
+						$$ = CNT(type_n, BOOL_TYPE, 0);
 					}
 				| VOID
 					{
-						$$ = CN(type_n, 0);
+						$$ = CNT(type_n, VOID_TYPE, 0);
 					}
 				| type ARRAY index_list
 					{
 						/* add a node_type as array declaration n?*/
-						$$ = CN(type_n, 2, $1, $2);
+						$$ = CN(type_n, 2, $1, $3);
 					}
 				;
 
