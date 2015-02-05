@@ -185,7 +185,7 @@ variable_list	: declaration_statement
 					}
 				| variable_list ',' declaration_statement
 					{
-						$$ = CN(variable_list_n, 2, $1, $2); 
+						$$ = CN(variable_list_n, 2, $1, $3); 
 					}
 				;
 
@@ -263,17 +263,17 @@ assignment_statement
 
 if_statement	: IF expression THEN statement_list END
 					{
-						$$ = CN(if_statement_n, 2, $1, $2);
+						$$ = CN(if_statement_n, 2, $2, $4);
 					}
 				| IF expression THEN statement_list ELSE statement_list END
 					{
-						$$ = CN(if_statement_n, 3, $1, $2, $3);
+						$$ = CN(if_statement_n, 3, $2, $4, $6);
 					}
 				;
 
 while_statement : WHILE expression DO statement_list END
 					{
-						$$ = CN(while_statement_n, 2, $1, $2);
+						$$ = CN(while_statement_n, 2, $2, $4);
 					}
 				;
 
@@ -286,7 +286,7 @@ for_statement	: FOR assignment_statement TO expression DO statement_list END
 return_statement
 				: RETURN expression
 					{
-						$$ = CN(return_statement_n, 1, $1);
+						$$ = CN(return_statement_n, 1, $2);
 					}
 				;
 
@@ -366,7 +366,7 @@ expression		: constant
 					}
 				| call
 					{
-						$$ = CNE(expression_n, func_call_e, 1, $1);
+						$$ = CN(expression_n, 1, $1);
 					}
 				| lvalue
 					{
