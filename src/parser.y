@@ -167,9 +167,6 @@ function_list	: function_list function
 						$$ = CN(function_list_n, 2, $1, $2);
 					}
 				| epislon
-					{
-						//$$ = NULL;
-					}
 				;
 
 statement_list	: statement
