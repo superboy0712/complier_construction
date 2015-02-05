@@ -393,12 +393,12 @@ lvalue			: variable
 constant		: TRUE_CONST
 					{
 						$$ = CNT(constant_n, BOOL_TYPE, 0);// terminals
-						SetInteger($$,"1");
+						$$->bool_const = TRUE;
 					}
 				| FALSE_CONST
 					{
 						$$ = CNT(constant_n, BOOL_TYPE, 0);// terminals
-						SetInteger($$,"0");
+						$$->bool_const = FALSE;
 					}
 				| INT_CONST
 					{
@@ -442,11 +442,11 @@ type			: INT
 
 index_list		: index_list '[' index ']'
 					{
-						$$ = CN(index_list_n, 2, $1, $2);
+						$$ = CN(index_list_n, 2, $1, $3);
 					}
 				| '[' index ']'
 					{
-						$$ = CN(index_list_n, 1, $1);
+						$$ = CN(index_list_n, 1, $2);
 					}
 				;
 
