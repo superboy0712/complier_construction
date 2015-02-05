@@ -57,7 +57,7 @@ for inputFile in `ls $vslProgramDir/*.vsl`; do
 	for i in {1..11}; do
 		if [ $i -eq $singleStage ] || [ $i -le $upToStage ] ; then
 			
-			./bin/vslc -s2 $i < $inputFile > testOutput/$inputFileBase.s$i$outExtention
+			./bin/vslc -s $i < $inputFile > testOutput/$inputFileBase.s$i$outExtention
 			diff -Nu correctOutput/$inputFileBase.s$i testOutput/$inputFileBase.s$i$outExtention > testOutput/$inputFileBase.s$i.diff
 			
 			if [ ! -s "testOutput/$inputFileBase.s$i.diff" ]; then

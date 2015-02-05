@@ -279,7 +279,7 @@ while_statement : WHILE expression DO statement_list END
 
 for_statement	: FOR assignment_statement TO expression DO statement_list END
 					{
-						$$ = CN(for_statement_n, 3, $1, $2, $3);
+						$$ = CN(for_statement_n, 3, $2, $4, $6);
 					}
 				;
 
@@ -292,7 +292,7 @@ return_statement
 
 print_statement	: PRINT expression_list
 					{
-						$$ = CN(print_statement_n, 1, $1);
+						$$ = CN(print_statement_n, 1, $2);
 					}
 				;
 
@@ -436,7 +436,7 @@ type			: INT
 				| type ARRAY index_list
 					{
 						/* add a node_type as array declaration n?*/
-						$$ = CN(type_n, 2, $1, $3);
+						$$ = CNT(type_n, ARRAY_TYPE, 2, $1, $3);
 					}
 				;
 
