@@ -67,7 +67,7 @@ void node_print ( FILE *output, node_t *root, int nesting );
 void node_print_entries ( FILE *output, node_t *root, int nesting );
 void node_finalize ( node_t *discard );
 
-void destroy_subtree ( FILE *output, node_t *discard );
+void destroy_subtree ( FILE *output, node_t *discard, int children );
 node_t *simplify_tree ( node_t *root );
 void bind_names ( node_t *root );
 

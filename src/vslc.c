@@ -88,7 +88,7 @@ main ( int argc, char **argv )
 
 
     
-    	destroy_subtree ( NULL, root );
+    	destroy_subtree ( NULL, root, 0 );
     
     //symtab_finalize();
     

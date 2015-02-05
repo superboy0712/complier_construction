@@ -236,22 +236,22 @@ void node_finalize ( node_t *discard )
 }
 
 
-void destroy_subtree ( FILE *output, node_t *discard )
+void destroy_subtree ( FILE *output, node_t *discard, int children )
 {
 	/* some visualized printing of free process */
 	static int nesting = 0;
-	printf(" into  :");
+	printf(" into  lvl %3d, node %3lx, %d th children:", nesting, ((long int)discard)%0xfff, children);
 	print_a_node( discard, nesting);
 	/*****************************************/
 	nesting ++;
 	for(int i = 0; i< discard->n_children; i++){
 		if(discard->children[i] != NULL){
-			destroy_subtree( stdout, discard->children[i]);
+			destroy_subtree( stdout, discard->children[i], i);
 		}
 	}
 	/*****************************************/
 	nesting--;
-	printf(" freed :");
+	printf(" freed lvl %3d, node %3lx, %d th children:", nesting, ((long int)discard)%0xfff, children);
 	print_a_node( discard, nesting);
 	node_finalize(discard);
 	/*****************************************/
