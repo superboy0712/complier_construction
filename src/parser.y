@@ -195,7 +195,7 @@ expression_list	: expression
 					}
 				| expression_list ',' expression
 					{
-						$$ = CN(expression_list_n, 2, $1, $2); 
+						$$ = CN(expression_list_n, 2, $1, $3); 
 					}
 				;
 
@@ -257,7 +257,7 @@ declaration_statement
 assignment_statement
 				: lvalue ASSIGN expression
 					{
-						$$ = CN(assignment_statement_n, 2, $1, $2);
+						$$ = CN(assignment_statement_n, 2, $1, $3);
 					}
 				;
 
@@ -302,67 +302,67 @@ expression		: constant
 					}
 				| expression '+' expression
 					{
-						$$ = CNE(expression_n, add_e, 2, $1, $2);
+						$$ = CNE(expression_n, add_e, 2, $1, $3);
 					}
 				| expression '-' expression
 					{
-						$$ = CNE(expression_n, sub_e, 2, $1, $2);
+						$$ = CNE(expression_n, sub_e, 2, $1, $3);
 					}
 				| expression '*' expression
 					{
-						$$ = CNE(expression_n, mul_e, 2, $1, $2);
+						$$ = CNE(expression_n, mul_e, 2, $1, $3);
 					}
 				| expression '/' expression
 					{
-						$$ = CNE(expression_n, div_e, 2, $1, $2);
+						$$ = CNE(expression_n, div_e, 2, $1, $3);
 					}
 				| expression '>' expression
 					{
-						$$ = CNE(expression_n, greater_e, 2, $1, $2);
+						$$ = CNE(expression_n, greater_e, 2, $1, $3);
 					}
 				| expression '<' expression
 					{
-						$$ = CNE(expression_n, less_e, 2, $1, $2);
+						$$ = CNE(expression_n, less_e, 2, $1, $3);
 					}
 				| expression EQUAL expression
 					{
-						$$ = CNE(expression_n, equal_e, 2, $1, $2);
+						$$ = CNE(expression_n, equal_e, 2, $1, $3);
 					}
 				| expression NEQUAL expression
 					{
-						$$ = CNE(expression_n, nequal_e, 2, $1, $2);
+						$$ = CNE(expression_n, nequal_e, 2, $1, $3);
 					}
 				| expression GEQUAL expression
 					{
-						$$ = CNE(expression_n, gequal_e, 2, $1, $2);
+						$$ = CNE(expression_n, gequal_e, 2, $1, $3);
 					}
 				| expression LEQUAL expression
 					{
-						$$ = CNE(expression_n, lequal_e, 2, $1, $2);
+						$$ = CNE(expression_n, lequal_e, 2, $1, $3);
 					}
 				| expression AND expression
 					{
-						$$ = CNE(expression_n, and_e, 2, $1, $2);
+						$$ = CNE(expression_n, and_e, 2, $1, $3);
 					}
 				| expression OR expression
 					{
-						$$ = CNE(expression_n, or_e, 2, $1, $2);
+						$$ = CNE(expression_n, or_e, 2, $1, $3);
 					}
 				| '-' expression %prec UMINUS
 					{
-						$$ = CNE(expression_n, uminus_e, 1, $1);
+						$$ = CNE(expression_n, uminus_e, 1, $2);
 					}
 				| '!' expression
 					{
-						$$ = CNE(expression_n, not_e, 1, $1);
+						$$ = CNE(expression_n, not_e, 1, $2);
 					}
 				| NEW type
 					{
-						$$ = CNE(expression_n, new_e, 1, $1);
+						$$ = CNE(expression_n, new_e, 1, $2);
 					}
 				| '(' expression ')'
 					{
-						$$ = CNE(expression_n, default_e, 1, $1);
+						$$ = CNE(expression_n, default_e, 1, $2);
 					}
 				| call
 					{
@@ -376,7 +376,7 @@ expression		: constant
 
 call			: variable '(' argument_list ')'
 					{
-						$$ = CNE(expression_n, func_call_e, 2, $1, $2); 
+						$$ = CNE(expression_n, func_call_e, 2, $1, $3); 
 					}
 				;
 
