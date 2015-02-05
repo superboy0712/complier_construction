@@ -168,7 +168,7 @@ function_list	: function_list function
 					}
 				| epislon
 					{
-						$$ = NULL;
+						//$$ = NULL;
 					}
 				;
 
