@@ -461,7 +461,7 @@ variable		: IDENTIFIER
 					{	
 						char * name = STRDUP(yytext);
 						$$ = CNL(variable_n, name, 0);
-						free(name);/* avoid memory leaks */
+						//free(name);/* avoid memory leaks */
 					}
 				;
 
