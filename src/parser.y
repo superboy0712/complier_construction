@@ -419,7 +419,7 @@ constant		: TRUE_CONST
 
 type			: INT
 					{
-						$$ = CN(type_n, 0);
+						$$ = CNT(type_n, INT_TYPE, 0);
 					}
 				| FLOAT
 					{
