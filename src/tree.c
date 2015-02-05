@@ -97,6 +97,56 @@ void node_print ( FILE *output, node_t *root, int nesting )
         fprintf ( output, "%*c%p\n", nesting, ' ', root );
 }
 
+void print_a_node( node_t *root, int nesting ){
+	if ( root != NULL )
+	    {
+	        // Print 'nesting' number of ' ' before node text description
+	        printf( "%*c%s", nesting, ' ', root->nodetype.text );
+
+	        // Print data type
+	        printf( "(%s)", type_to_string(root->data_type));
+
+	        // Print the value of constants
+	        if ( root->nodetype.index == CONSTANT || root->nodetype.index == INDEX ) {
+	        	switch (root->data_type.base_type)
+	        	{
+	            	case INT_TYPE:
+	            		printf( "(%d)", root->int_const );
+	            		break;
+	            	case FLOAT_TYPE:
+	            		printf( "(%f)", root->float_const );
+	            		break;
+	            	case BOOL_TYPE:
+	            		printf( "(%s)", root->bool_const ? "True" : "False" );
+	            		break;
+	            	case STRING_TYPE:
+	            		printf( "(%s)", root->string_const );
+	            		break;
+
+	            	default:
+	            		printf( "(ERROR: No type set for constant/index)" );
+	            		break;
+	            }
+	        }
+
+	        // Print the label of nodes where it is set,
+	        if(root->label != NULL){
+	        	printf( "(\"%s\")", root->label );
+	        }
+
+	        // Print expression type where it is set
+
+	        if(root->expression_type.text != NULL){
+	        	printf( "(%s)", root->expression_type.text);
+	        }
+
+
+	        putchar ( '\n' );
+	    }
+	    else
+	        printf( "%*c%p\n", nesting, ' ', root );
+
+}
 
 // Print the symbol table entries attached to a node and all children recursively
 void node_print_entries ( FILE *output, node_t *root, int nesting )
@@ -169,18 +219,8 @@ node_t * node_init ( nodetype_t type,
 
 void node_finalize ( node_t *discard )
 {
-	/* some visualized printing of free process */
-	static int level = 0;//root
-	putchar('\n');
-	for(int i=0; i<level; i++)
-		putchar('\t');
-	printf("into  : %s", discard->label);
-			level++;
-	/*****************************************/
-	for(int i = 0; i< discard->n_children; i++){
-		if(discard->children[i] != NULL){
-			node_finalize(discard->children[i]);
-		}
+	if(discard->label != NULL){
+		free(discard->label);
 	}
 	discard->label = NULL;
 	free(discard->children);
@@ -192,18 +232,27 @@ void node_finalize ( node_t *discard )
 	}
 	/*****************************************/
 	free(discard);
-	discard = NULL;
-	/*****************************************/
-	putchar('\n');
-	for(int i=0; i<level; i++)
-		putchar('\t');
-	printf("freed : %s", discard->label);
-		level--;
-	/*****************************************/
+	//discard = NULL;
 }
 
 
 void destroy_subtree ( FILE *output, node_t *discard )
 {
+	/* some visualized printing of free process */
+	static int nesting = 0;
+	printf(" into  :");
+	print_a_node( discard, nesting);
+	/*****************************************/
+	nesting ++;
+	for(int i = 0; i< discard->n_children; i++){
+		if(discard->children[i] != NULL){
+			destroy_subtree( stdout, discard->children[i]);
+		}
+	}
+	/*****************************************/
+	nesting--;
+	printf(" freed :");
+	print_a_node( discard, nesting);
 	node_finalize(discard);
+	/*****************************************/
 }
