@@ -386,7 +386,7 @@ lvalue			: variable
 					}
 				| expression '[' expression ']'
 					{
-						$$ = CNE(expression_n, array_index_e, 2, $1, $2);
+						$$ = CNE(expression_n, array_index_e, 2, $1, $3);
 					}
 				;
 
@@ -458,8 +458,10 @@ index			: INT_CONST
 				;
 
 variable		: IDENTIFIER
-					{
-						$$ = CNL(variable_n, yytext, 0);
+					{	
+						char * name = STRDUP(yytext);
+						$$ = CNL(variable_n, name, 0);
+						free(name);/* avoid memory leaks */
 					}
 				;
 
