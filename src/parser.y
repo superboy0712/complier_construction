@@ -125,10 +125,13 @@ int yylex ( void );                 /* Defined in the generated scanner */
  */
 %nonassoc ARRAY
 %nonassoc ']'
+/*%left OR
+ *%left AND
+ *%left EQUAL NEQUAL
+ *
+*/
 
-%left OR
-%left AND
-%left EQUAL NEQUAL
+
 %left GEQUAL LEQUAL '<' '>'
 %left '+' '-'
 %left '*' '/'
@@ -324,30 +327,7 @@ expression		: constant
 					{
 						$$ = CNE(expression_n, less_e, 2, $1, $3);
 					}
-				| expression EQUAL expression
-					{
-						$$ = CNE(expression_n, equal_e, 2, $1, $3);
-					}
-				| expression NEQUAL expression
-					{
-						$$ = CNE(expression_n, nequal_e, 2, $1, $3);
-					}
-				| expression GEQUAL expression
-					{
-						$$ = CNE(expression_n, gequal_e, 2, $1, $3);
-					}
-				| expression LEQUAL expression
-					{
-						$$ = CNE(expression_n, lequal_e, 2, $1, $3);
-					}
-				| expression AND expression
-					{
-						$$ = CNE(expression_n, and_e, 2, $1, $3);
-					}
-				| expression OR expression
-					{
-						$$ = CNE(expression_n, or_e, 2, $1, $3);
-					}
+				
 				| '-' expression %prec UMINUS
 					{
 						$$ = CNE(expression_n, uminus_e, 1, $2);
@@ -372,8 +352,66 @@ expression		: constant
 					{
 						$$ = CNE(expression_n, default_e, 1, $1);
 					}
+				| expression_or
+					{
+						$$ = CNE(expression_n, default_e, 1, $1);
+					}
 				;
 
+/*******************************************************************/
+/*%left OR
+ *%left AND
+ *%left EQUAL NEQUAL
+ *%left GEQUAL LEQUAL '<' '>'
+*/
+
+/* gonna to make some  equivalent rewriting of the above precedence rules */
+expression_equal : expression_equal EQUAL expression_compare
+					{
+						$$ = CNE(expression_n, equal_e, 2, $1, $3);
+					}
+				| expression_equal NEQUAL expression_compare
+					{
+						$$ = CNE(expression_n, nequal_e, 2, $1, $3);
+					}
+				| expression_compare
+					{
+						$$ = CN(expression_n, 1, $1);
+					}
+				;
+expression_compare : expression_compare GEQUAL expression
+					{
+						$$ = CNE(expression_n, gequal_e, 2, $1, $3);
+					}
+				| expression_compare LEQUAL expression
+					{
+						$$ = CNE(expression_n, lequal_e, 2, $1, $3);
+					}
+				| expression
+					{
+						$$ = CN(expression_n, 1, $1);
+					}
+				;
+expression_and	: expression_and AND expression_equal
+					{
+						$$ = CNE(expression_n, and_e, 2, $1, $3);
+					}
+				| expression_equal
+					{
+						$$ = CN(expression_n, 1, $1);
+					}
+				;
+
+expression_or	: expression_or OR expression_and
+					{
+						$$ = CNE(expression_n, or_e, 2, $1, $3);
+					}
+				| expression_and
+					{
+						$$ = CN(expression_n, 1, $1);
+					}
+				;
+/********************************************************************/
 call			: variable '(' argument_list ')'
 					{
 						$$ = CNE(expression_n, func_call_e, 2, $1, $3); 
