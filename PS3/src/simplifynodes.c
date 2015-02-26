@@ -1,6 +1,5 @@
 #include "simplifynodes.h"
 #include <assert.h>
-
 extern int outputStage; // This variable is located in vslc.c
 
 Node_t* simplify_default ( Node_t *root, int depth )
@@ -110,6 +109,18 @@ Node_t *simplify_declaration_statement ( Node_t *root, int depth )
 			root->children[i]->simplify(root->children[i], depth + 1);
 		}
 	}
+	if(root->nodetype.index != declaration_statement_n.index)
+		return root;
+	assert(root->n_children == 2);
+	root->data_type = root->children[0]->data_type;
+	node_finalize(root->children[0]);
+	root->children[0] = NULL;
+	root->label = STRDUP(root->children[1]->label);
+	node_finalize(root->children[1]);
+	root->children[1] = NULL;
+	free(root->children);
+	root->children = NULL;
+	root->n_children = 0;
 	return root;
 }
 
@@ -211,7 +222,6 @@ Node_t *simplify_list ( Node_t *root, int depth )
 		// free the old child
 		free(left->children);
 		left->children = NULL;
-//		free(left);
 		node_finalize(left);
 		left = NULL;
 	}
