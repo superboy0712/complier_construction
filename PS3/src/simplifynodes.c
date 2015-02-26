@@ -173,10 +173,8 @@ Node_t *simplify_list ( Node_t *root, int depth )
 		root->children[left->n_children] = right;
 		// free the old child
 		left->children = NULL;
-		//free(left); !! need to free before reallocate!!
-		//left = NULL;
-	} 	else {
-		/* leftmost is NULL*/
+		free(left);
+		left = NULL;
 	}
 
 	return root;
