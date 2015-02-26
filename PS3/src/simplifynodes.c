@@ -272,6 +272,13 @@ Node_t *simplify_expression ( Node_t *root, int depth )
 	}
 	//simplify_single_child(root, depth);
 	/* copy the whole content of the child to me */
+	/* except new_e, uminus_e and not_e */
+	if((root->expression_type.index == new_e.index)
+			||(root->expression_type.index == uminus_e.index)
+			||(root->expression_type.index == not_e.index)
+			){
+		return root;
+	}
 	Node_t * child = root->children[0];
 	if(child != NULL){
 		*root = *child;
