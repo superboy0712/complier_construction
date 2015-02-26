@@ -135,6 +135,28 @@ Node_t *simplify_single_child ( Node_t *root, int depth )
 			root->children[i]->simplify(root->children[i], depth + 1);
 		}
 	}
+	/* argument_list, statements, parameter_lists,
+	 * expression
+	 * except new_e, uminus_e and not_e */
+	if(root->n_children != 1)
+		return root;
+
+	/* copy the whole content of the child to me */
+	Node_t * child = root->children[0];
+	if(child != NULL){
+		*root = *child;
+		root->children = malloc(child->n_children * sizeof(Node_t *));
+		if(root->children == NULL){
+			perror("malloc in simplify single child");
+			return root;
+		}
+		memcpy(root->children, child->children, child->n_children * sizeof(Node_t *));
+		if(child->label!= NULL){
+			root->label = STRDUP(child->label);
+		}
+		node_finalize(child);
+		child = NULL;
+	}
 	return root;
 }
 
