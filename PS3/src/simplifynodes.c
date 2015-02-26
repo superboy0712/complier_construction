@@ -262,6 +262,32 @@ Node_t *simplify_expression ( Node_t *root, int depth )
 			root->children[i]->simplify(root->children[i], depth + 1);
 		}
 	}
+
+	if(root->n_children != 1){
+		if(root->n_children != 2)
+			return root;
+		/* evaluating my value */
+
+		return root;
+	}
+	//simplify_single_child(root, depth);
+	/* copy the whole content of the child to me */
+	Node_t * child = root->children[0];
+	if(child != NULL){
+		*root = *child;
+		root->children = malloc(child->n_children * sizeof(Node_t *));
+		if(root->children == NULL){
+			perror("malloc in simplify expression single child");
+			return root;
+		}
+		memcpy(root->children, child->children, child->n_children * sizeof(Node_t *));
+		if(child->label!= NULL){
+			root->label = STRDUP(child->label);
+		}
+		node_finalize(child);
+		child = NULL;
+	}
+
 	return root;
 }
 
