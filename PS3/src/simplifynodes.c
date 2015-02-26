@@ -23,9 +23,25 @@ Node_t *simplify_types ( Node_t *root, int depth )
 		return NULL;
 	}
 	for( int i = 0; i < root->n_children; i++){
-		if(root->children[i] != NULL){
-			root->children[i]->simplify(root->children[i], depth + 1);
+			if(root->children[i] != NULL){
+				root->children[i]->simplify(root->children[i], depth + 1);
+			}
+	}
+	if(root->data_type.base_type == ARRAY_TYPE){
+		root->data_type.array_type = root->children[0]->data_type.base_type;
+		//free(root->children[0]);
+		root->data_type.n_dimensions = root->children[1]->n_children;
+		int n = root->children[1]->n_children;
+		int* index = malloc(n*sizeof(int));
+		for (int i = 0; i < n; ++i) {
+			index[i] = root->children[1]->children[i]->int_const;
+			free(root->children[1]->children[i]);
 		}
+		root->data_type.dimensions = index;
+		free(root->children[1]);
+		//free(root->children[0]);
+		root->children = NULL;
+		root->n_children = 0;
 	}
 	return root;
 }
@@ -128,22 +144,22 @@ Node_t *simplify_list ( Node_t *root, int depth )
 //		}
 	}
 	/* only one node, no need to flatten */
-	if(root->n_children == 1){
+	if(root->n_children < 2){
 		return root;
 	}
 	assert(root->n_children == 2);
-	Node_t * right = root->children[root->n_children -1 ];
+	Node_t * right = root->children[1];
 	Node_t * left = root->children[0];
 	assert(left != right);
+
 	// assume the leftmost child also is a sorted/simplified list type node
 	if(left->children != NULL){
 		// spare more space of the children array
-		if(
-				realloc(
-						root->children,
-						(left->n_children + 1) * sizeof(Node_t *)
-						) == NULL
-		){
+		root->children = realloc(
+								root->children,
+								(left->n_children + 1) * sizeof(Node_t *)
+								);
+		if(root->children == NULL){
 				perror("realloc in list simplify");
 				exit(EXIT_FAILURE);
 		}
@@ -157,9 +173,12 @@ Node_t *simplify_list ( Node_t *root, int depth )
 		root->children[left->n_children] = right;
 		// free the old child
 		left->children = NULL;
-		free(left);
-		left = NULL;
+		//free(left); !! need to free before reallocate!!
+		//left = NULL;
+	} 	else {
+		/* leftmost is NULL*/
 	}
+
 	return root;
 }
 
