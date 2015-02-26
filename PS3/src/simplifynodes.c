@@ -57,6 +57,32 @@ Node_t *simplify_function ( Node_t *root, int depth )
 			root->children[i]->simplify(root->children[i], depth + 1);
 		}
 	}
+	if(root->nodetype.index != function_n.index)
+		return root;
+	assert(root->n_children == 4);
+	root->data_type = root->children[0]->data_type;
+	root->label = STRDUP((root->children[1]->label));
+	Node_t * pl = root->children[2];
+	Node_t * sl = root->children[3];
+	//node_finalize()
+	free(root->children[0]);
+	free(root->children[1]->label);/* need to free */
+		free(root->children[1]);
+	free(root->children);
+	root->children = malloc(2*sizeof(Node_t *));
+	if(root->children == NULL){
+		perror("malloc in simplify function");
+		exit(EXIT_FAILURE);
+	}
+	root->children[0] = pl;
+	root->children[1] = sl;
+	root->children[2] = NULL;
+	root->children[3] = NULL;
+	root->n_children = 2; /* very important */
+
+	pl = NULL;
+	sl = NULL;
+
 	return root;
 }
 
