@@ -29,17 +29,20 @@ Node_t *simplify_types ( Node_t *root, int depth )
 	}
 	if(root->data_type.base_type == ARRAY_TYPE){
 		root->data_type.array_type = root->children[0]->data_type.base_type;
-		//free(root->children[0]);
+		node_finalize(root->children[0]);
+		root->children[0] = NULL;
 		root->data_type.n_dimensions = root->children[1]->n_children;
 		int n = root->children[1]->n_children;
 		int* index = malloc(n*sizeof(int));
 		for (int i = 0; i < n; ++i) {
 			index[i] = root->children[1]->children[i]->int_const;
-			free(root->children[1]->children[i]);
+			node_finalize(root->children[1]->children[i]);
+			root->children[1]->children[i] = NULL;
 		}
 		root->data_type.dimensions = index;
-		free(root->children[1]);
-		//free(root->children[0]);
+		node_finalize(root->children[1]);
+		root->children[1] = NULL;
+		free(root->children);
 		root->children = NULL;
 		root->n_children = 0;
 	}
@@ -70,13 +73,13 @@ Node_t *simplify_function ( Node_t *root, int depth )
 	Node_t * sl = root->children[3];
 
 	//node_finalize()
-	free(root->children[0]);
-	free(root->children[1]->label);/* need to free */
-		free(root->children[1]);
-	root->children[0] = NULL;
-	root->children[1] = NULL;
-	root->children[2] = NULL;
-	root->children[3] = NULL;
+	node_finalize(root->children[0]);
+		root->children[0] = NULL;
+	//free(root->children[1]->label);/* need to free */
+	node_finalize(root->children[1]);
+		root->children[1] = NULL;
+		root->children[2] = NULL;
+		root->children[3] = NULL;
 	free(root->children);
 	root->children = malloc(2*sizeof(Node_t *));
 	if(root->children == NULL){
@@ -206,8 +209,10 @@ Node_t *simplify_list ( Node_t *root, int depth )
 		// copy the rightmost child to new array
 		root->children[left->n_children] = right;
 		// free the old child
+		free(left->children);
 		left->children = NULL;
-		free(left);
+//		free(left);
+		node_finalize(left);
 		left = NULL;
 	}
 
