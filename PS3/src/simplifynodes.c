@@ -61,13 +61,22 @@ Node_t *simplify_function ( Node_t *root, int depth )
 		return root;
 	assert(root->n_children == 4);
 	root->data_type = root->children[0]->data_type;
-	root->label = STRDUP((root->children[1]->label));
+		root->label = STRDUP((root->children[1]->label));
+		if(root->label == NULL){
+			perror("STRDUP in simplify function");
+			exit(EXIT_FAILURE);
+		}
 	Node_t * pl = root->children[2];
 	Node_t * sl = root->children[3];
+
 	//node_finalize()
 	free(root->children[0]);
 	free(root->children[1]->label);/* need to free */
 		free(root->children[1]);
+	root->children[0] = NULL;
+	root->children[1] = NULL;
+	root->children[2] = NULL;
+	root->children[3] = NULL;
 	free(root->children);
 	root->children = malloc(2*sizeof(Node_t *));
 	if(root->children == NULL){
@@ -76,8 +85,7 @@ Node_t *simplify_function ( Node_t *root, int depth )
 	}
 	root->children[0] = pl;
 	root->children[1] = sl;
-	root->children[2] = NULL;
-	root->children[3] = NULL;
+
 	root->n_children = 2; /* very important */
 
 	pl = NULL;
