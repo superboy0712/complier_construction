@@ -7,6 +7,9 @@ Node_t* simplify_default ( Node_t *root, int depth )
 	if(root == NULL){
 		return NULL;
 	}
+	if(outputStage == 4)
+		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
+
 	for( int i = 0; i < root->n_children; i++){
 		if(root->children[i] != NULL){
 			root->children[i]->simplify(root->children[i], depth + 1);
@@ -21,6 +24,9 @@ Node_t *simplify_types ( Node_t *root, int depth )
 	if(root == NULL){
 		return NULL;
 	}
+	if(outputStage == 4)
+		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
+
 	for( int i = 0; i < root->n_children; i++){
 			if(root->children[i] != NULL){
 				root->children[i]->simplify(root->children[i], depth + 1);
@@ -54,6 +60,9 @@ Node_t *simplify_function ( Node_t *root, int depth )
 	if(root == NULL){
 		return NULL;
 	}
+	if(outputStage == 4)
+		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
+
 	for( int i = 0; i < root->n_children; i++){
 		if(root->children[i] != NULL){
 			root->children[i]->simplify(root->children[i], depth + 1);
@@ -104,6 +113,9 @@ Node_t *simplify_declaration_statement ( Node_t *root, int depth )
 	if(root == NULL){
 		return NULL;
 	}
+	if(outputStage == 4)
+		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
+
 	for( int i = 0; i < root->n_children; i++){
 		if(root->children[i] != NULL){
 			root->children[i]->simplify(root->children[i], depth + 1);
@@ -130,6 +142,9 @@ Node_t *simplify_single_child ( Node_t *root, int depth )
 	if(root == NULL){
 		return NULL;
 	}
+	if(outputStage == 4)
+		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
+
 	for( int i = 0; i < root->n_children; i++){
 		if(root->children[i] != NULL){
 			root->children[i]->simplify(root->children[i], depth + 1);
@@ -257,6 +272,9 @@ Node_t *simplify_expression ( Node_t *root, int depth )
 	if(root == NULL){
 		return NULL;
 	}
+	if(outputStage == 4)
+		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
+
 	for( int i = 0; i < root->n_children; i++){
 		if(root->children[i] != NULL){
 			root->children[i]->simplify(root->children[i], depth + 1);
