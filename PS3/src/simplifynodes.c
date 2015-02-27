@@ -7,8 +7,8 @@ Node_t* simplify_default ( Node_t *root, int depth )
 	if(root == NULL){
 		return NULL;
 	}
-	if(outputStage == 4)
-		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
+//	if(outputStage == 4)
+//		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 
 	for( int i = 0; i < root->n_children; i++){
 		if(root->children[i] != NULL){
