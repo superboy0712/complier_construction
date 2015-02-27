@@ -209,8 +209,8 @@ Node_t *simplify_list_with_null ( Node_t *root, int depth )
 		}
 	}
 	/* function_list may also need to eliminate single child situation */
-	if((root->n_children != 1)
-			||(root->nodetype.index != function_list_n.index))
+	if((root->children[0]->n_children != 1)
+			||(root->children[0]->nodetype.index != function_list_n.index))
 			return root;
 
 	/* copy the whole content of the child to me */
