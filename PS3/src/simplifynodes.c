@@ -194,6 +194,8 @@ Node_t *simplify_list_with_null ( Node_t *root, int depth )
 				perror("memmove");
 				exit(EXIT_FAILURE);
 			}
+			/* set the rightmost element to NULL */
+			root->children[root->n_children - 1] = NULL;
 			// decrease n_childeren
 			root->n_children--;/* this cause next simplification never called */
 			i--; /* very important!! */
