@@ -205,29 +205,31 @@ Node_t *simplify_list_with_null ( Node_t *root, int depth )
 				perror("realloc");
 				exit(EXIT_FAILURE);
 			}
-			/* function_list may also need to eliminate single child situation */
-			if(root->n_children != 1)
-					return root;
 
-			/* copy the whole content of the child to me */
-			Node_t * child = root->children[0];
-			if(child != NULL){
-				*root = *child;
-				root->children = malloc(child->n_children * sizeof(Node_t *));
-				if(root->children == NULL){
-					perror("malloc in simplify single child");
-					return root;
-				}
-				memcpy(root->children, child->children, child->n_children * sizeof(Node_t *));
-				if(child->label!= NULL){
-					root->label = STRDUP(child->label);
-				}
-				node_finalize(child);
-				child = NULL;
-			}
 		}
 	}
+	/* function_list may also need to eliminate single child situation */
+	if((root->n_children != 1)
+			||(root->nodetype.index != function_list_n.index))
+			return root;
 
+	/* copy the whole content of the child to me */
+	Node_t * child = root->children[0];
+	if(child != NULL){
+		*root = *child;
+		root->children = malloc(child->n_children * sizeof(Node_t *));
+		if(root->children == NULL){
+			perror("malloc in simplify single child");
+			return root;
+		}
+		memcpy(root->children, child->children, child->n_children * sizeof(Node_t *));
+		if(child->label!= NULL){
+			root->label = STRDUP(child->label);
+		}
+
+		node_finalize(child);
+		child = NULL;
+	}
 	return root;
 }
 
