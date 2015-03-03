@@ -7,8 +7,6 @@ Node_t* simplify_default ( Node_t *root, int depth )
 	if(root == NULL){
 		return NULL;
 	}
-//	if(outputStage == 4)
-//		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 
 	for( int i = 0; i < root->n_children; i++){
 		if(root->children[i] != NULL){
@@ -300,7 +298,7 @@ Node_t *simplify_expression ( Node_t *root, int depth )
 		return NULL;
 	}
 	if(outputStage == 4)
-		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
+			printf( "%*cSimplify %s (%s) \n", depth, ' ', root->nodetype.text, root->expression_type.text );
 
 	for( int i = 0; i < root->n_children; i++){
 		if(root->children[i] != NULL){
@@ -311,11 +309,10 @@ Node_t *simplify_expression ( Node_t *root, int depth )
 	if(root->n_children != 1){
 		if(root->n_children != 2)
 			return root;
-		/* evaluating my value */
-
+		/* evaluating my value, n_children == 2 */
+		//root->expression_type
 		return root;
 	}
-	//simplify_single_child(root, depth);
 	/* copy the whole content of the child to me */
 	/* except new_e, uminus_e and not_e */
 	if((root->expression_type.index == new_e.index)
