@@ -178,8 +178,8 @@ Node_t *simplify_list_with_null ( Node_t *root, int depth )
 	if(root == NULL){
 			return NULL;
 		}
-//	if(outputStage == 4)
-//		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
+	if(outputStage == 4)
+		printf( "%*cSimplify %s \n", depth, ' ', root->nodetype.text );
 
 	for( int i = 0; i < root->n_children; i++){
 
@@ -202,19 +202,55 @@ Node_t *simplify_list_with_null ( Node_t *root, int depth )
 				exit(EXIT_FAILURE);
 			}
 
+		}else{
+				/* only one node, no need to flatten */
+				if(root->n_children < 2){
+					return root;
+				}
+				assert(root->n_children == 2);
+				Node_t * right = root->children[1];
+				Node_t * left = root->children[0];
+				assert(left != right);
+
+				// assume the leftmost child also is a sorted/simplified list type node
+				if(left->children != NULL){
+					// spare more space of the children array
+					root->children = realloc(
+											root->children,
+											(left->n_children + 1) * sizeof(Node_t *)
+											);
+					if(root->children == NULL){
+							perror("realloc in list simplify");
+							exit(EXIT_FAILURE);
+					}
+					// increase n_children
+					root->n_children = left->n_children + 1;
+					// copy the grand children to new children array
+					for (int i = 0; i < left->n_children; ++i) {
+						root->children[i] = left->children[i];
+					}
+					// copy the rightmost child to new array
+					root->children[left->n_children] = right;
+					// free the old child
+					free(left->children);
+					left->children = NULL;
+					node_finalize(left);
+					left = NULL;
+				}
 		}
 	}
 	/* normal list list simplification */
-	simplify_list(root, depth);
+	//simplify_list(root, depth);
 	/* function_list may also need to eliminate single child situation */
 	if(
 			//((root->children[0]->n_children == 1)
 			//&&(root->children[0]->nodetype.index == function_list_n.index))/*exclude the highest level one */
 				(root->n_children !=1)
 				||(root->nodetype.index != function_list_n.index)
-				|| depth ==1 )/* reserve the 1 lvl function_list node*/
+				)
 			return root;
-
+	if(depth == 1)/* reserve the 1 lvl function_list node*/
+		return root;
 	/* copy the whole content of the child to me */
 	Node_t * child = root->children[0];
 	if(child != NULL){
