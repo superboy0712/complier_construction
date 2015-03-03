@@ -282,11 +282,37 @@ Node_t *simplify_expression ( Node_t *root, int depth )
 	}
 
 	if(root->n_children != 1){
-		if(root->n_children != 2)
-			return root;
+		if(root->n_children == 2)
+
 		/* evaluating my value, n_children == 2 */
-		//root->expression_type
-		return root;
+		if((root->children[0]->nodetype.index == constant_n.index
+				&&root->children[1]->nodetype.index == constant_n.index)
+				&&(root->children[0]->data_type.base_type == INT_TYPE
+						&&root->children[1]->data_type.base_type == INT_TYPE))
+		{
+			switch (root->expression_type.index) {
+				case ADD_E:
+					root->int_const = root->children[0]->int_const
+										+ root->children[1]->int_const;
+				break;
+				case SUB_E:
+							root->int_const = root->children[0]->int_const
+										- root->children[1]->int_const;
+				break;
+				case MUL_E:
+							root->int_const = root->children[0]->int_const
+										* root->children[1]->int_const;
+				break;
+				case DIV_E:
+							root->int_const = root->children[0]->int_const
+										/ root->children[1]->int_const;
+				break;
+				default:
+					puts("arithmetic expression parsing error, not int or float expression");
+				break;
+			}
+		}
+			return root;
 	}
 	/* copy the whole content of the child to me */
 	/* except new_e, uminus_e and not_e */
