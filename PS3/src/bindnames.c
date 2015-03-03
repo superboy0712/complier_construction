@@ -30,8 +30,11 @@ int bind_constant ( node_t *root, int stackOffset)
 
 	if(outputStage == 6)
 		printf( "CONSTANT\n");
+	int ret;
+	if(root->data_type.base_type == STRING_TYPE)
+		ret = strings_add(root->string_const);
 
-	return 0;
+	return ret;
 }
 
 

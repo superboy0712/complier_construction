@@ -1,6 +1,6 @@
 #include "symtab.h"
-
-
+#include <string.h>
+#include "tree.h"
 
 //For the sting table
 static char **strings;
@@ -14,16 +14,27 @@ extern int outputStage; // This variable is located in vslc.c
 void
 symtab_init ( void )
 {
-
-    
+	strings = calloc( strings_size, sizeof(char *));
+	if(strings == NULL){
+		perror("symtab_init");
+		exit(EXIT_FAILURE);
+	}
+	strings_index = 0;
 }
 
 
 void
 symtab_finalize ( void )
 {
-
-    
+	for (int i = 0; i < strings_index; ++i) {
+		if(strings[i]!=NULL){
+			free(strings[i]);
+			strings[i] = NULL;
+		}
+	}
+	strings_index = 0;
+	free(strings);
+	strings = NULL;
 }
 
 
@@ -31,10 +42,27 @@ int
 strings_add ( char *str )
 {
     //You may need to add code both before and after the printout
-    
+    if(str == NULL)
+    	//puts("null string");
+    	return strings_index;
+	int index = strings_index;
     if(outputStage == 7)
         printf( "Add strings (%s), index: %d \n", str, strings_index );
-
+    if(strings_index >= strings_size){
+    	strings = realloc(strings, 2*strings_size*sizeof(char *));
+    	if(strings == NULL){
+    		puts("strings_add");
+    		exit(EXIT_FAILURE);
+    	}
+    	strings_size+=strings_size;
+    }
+    strings[strings_index] = STRDUP(str);
+    if(strings[strings_index] == NULL){
+    	puts("strings_add");
+    	exit(EXIT_FAILURE);
+    }
+    strings_index ++;
+    return index;
 }
 
 
@@ -54,7 +82,7 @@ strings_output ( FILE *stream )
 		".NEWLINE: .ascii \"\\n \\000\"\n",
 		stream
 	);
-	for ( int i=0; i<=strings_index; i++ ) {
+	for ( int i=0; i<strings_index; i++ ) {
 		fprintf ( stream, ".STRING%d: .ascii %s\n", i, strings[i] );
 		fprintf ( stream, ".ascii \"\\000\"\n"); // ugly hack
 	}
