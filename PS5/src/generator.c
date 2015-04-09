@@ -210,7 +210,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 			/* caller saves registers on stack */
 			instruction_add(STRING, STRDUP("\tpush {r0, r1, r2, r3}"), NULL, 0, 0);
 			/* caller pushes parameters on stack */
-			gen_default(arg_list, scopedepth); /* generate arg_list's code */
+			//gen_default(arg_list, scopedepth); /* generate arg_list's code */
 			/* in gen_variable already push on top of stack !!!!!*/
 			/* caller saves return address in link register*/
 				/* use bl to automate this link register's saving */
