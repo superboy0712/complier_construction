@@ -207,10 +207,14 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 		case FUNC_CALL_E:
 		{
 			char const2str[50] = {0};
+			node_t *arg_list = NULL;
 			assert(root->children[0]);
-			assert(root->children[1]);
-			assert(root->n_children == 2);
-			node_t *arg_list = root->children[1];
+			assert(root->n_children >= 1);
+			if(root->children[1]){
+				/* may don't have arguments */
+				arg_list = root->children[1];
+			}
+
 			/* caller saves registers on stack */
 			instruction_add(STRING, STRDUP("\tpush {r0, r1, r2, r3}"), NULL, 0, 0);
 			/* caller pushes parameters on stack */
@@ -227,8 +231,10 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 
 			/* caller removes parameters, restores registers */
 			/* all parameters are 4 bytes long, just increase sp */
-			sprintf(const2str, "#%d", 4*(arg_list->n_children));
-			instruction_add3(ADD, sp, sp, STRDUP(const2str));
+			if(root->children[1]){
+				sprintf(const2str, "#%d", 4*(arg_list->n_children));
+				instruction_add3(ADD, sp, sp, STRDUP(const2str));
+			}
 			instruction_add(STRING, STRDUP("\tpop {r0, r1, r2, r3}"), NULL, 0, 0);
 			/* use results, push the value on top of stack, assuming return value on r0 */
 			instruction_add(PUSH, r0, NULL, 0, 0);
@@ -319,7 +325,20 @@ void gen_CONSTANT(node_t * root, int scopedepth) {
 
 void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 	tracePrint("Starting ASSIGNMENT_STATEMENT\n");
+	/**
+	 * assignment statement ::= lvalue ASSIGN expression
+	 */
+	assert(root);
+	assert(root->n_children == 2);
+	assert(root->nodetype.index == assignment_statement_n.index);
 	gen_default(root, scopedepth);
+	/* pop rvalue */
+	instruction_add(POP, r3, NULL, 0, 0);
+	assert(root->children[0]->entry);
+	/* STORE to lvalue's address */
+	instruction_add(STR, fp, r3, root->children[0]->entry->stack_offset, 0);
+	/* restore stack, also pop lvalue(garbage) */
+	instruction_add3(ADD, sp, sp, "#4");
 	tracePrint("End ASSIGNMENT_STATEMENT\n");
 }
 
