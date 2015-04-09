@@ -180,8 +180,7 @@ void gen_DECLARATION_STATEMENT(node_t *root, int scopedepth) {
 	 * after simplification, the layout should be declaration-{data_type,label}
 	 * WITHOUT ANY CHILDREN
 	 */
-	if(root==NULL)
-		return;
+	assert(root);
 	assert(root->n_children == 0);
 	/* all base data types and array pointers are 4 bytes long */
 	instruction_add3(SUB, sp, sp, "#4");
@@ -326,7 +325,18 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 
 void gen_RETURN_STATEMENT(node_t *root, int scopedepth) {
 	tracePrint("Starting RETURN_STATEMENT\n");
+	/**
+	 * RETURN expression
+	 */
+	assert(root);
+	assert(root->nodetype.index == return_statement_n.index);
+	assert(root->n_children==1);
+	assert(root->children[0]);
+	//assert(root->children[0]->nodetype.index == expression_n.index );// could be variable, simplified
 	gen_default(root, scopedepth);
+	/* now the expression's value already pushed on top of stack if gen_EXPRESSION works as expect */
+	/* pop stack top to r0, which used as return value */
+	instruction_add(POP, r0, NULL, 0, 0);
 	tracePrint("End RETURN_STATEMENT\n");
 }
 
