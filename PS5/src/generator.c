@@ -215,8 +215,10 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 			/* caller saves registers on stack */
 			instruction_add(STRING, STRDUP("\tpush {r0, r1, r2, r3}"), NULL, 0, 0);
 			/* caller pushes parameters on stack */
-			//gen_default(arg_list, scopedepth); /* generate arg_list's code */
-			/* in gen_variable already push on top of stack !!!!!*/
+			gen_default(arg_list, scopedepth); /* generate arg_list's code */
+				/* in gen_variable/constant already push on top of stack !!!!!*/
+				/* argument_list is actually expression_list, could be constants or other composition other than variables */
+
 			/* caller saves return address in link register*/
 				/* use bl to automate this link register's saving */
 			/* caller jumps to called function address */
@@ -255,7 +257,10 @@ void gen_VARIABLE(node_t *root, int scopedepth) {
 	tracePrint("Starting VARIABLE\n");
 	assert(root);
 	assert(root->entry);
-		/* local variables */
+		/* local variables or arguments */
+		if(root->entry->stack_offset>0){
+			tracePrint("\tI am an argument passing to a function!\n");
+		}
 		instruction_add(LDR, r3, fp, 0, root->entry->stack_offset);
 		/* push the value on top of stack for possible assignement, as rhs value/constant ? */
 		/* or just for evaluating nesting arithmetic/logic expressions */
