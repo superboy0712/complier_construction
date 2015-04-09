@@ -210,12 +210,8 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 			/* caller saves registers on stack */
 			instruction_add(STRING, STRDUP("\tpush {r0, r1, r2, r3}"), NULL, 0, 0);
 			/* caller pushes parameters on stack */
-//
-//			for (int i = 1; i < root->n_children; ++i) {
-//				sprintf(const2str, "#");
-//			}
-				/* in gen_variable already push on top of stack !!!!!*/
-			//instruction_add(STRING, STRDUP("\tpush {r0, r1, r2, r3}"), NULL, 0, 0);
+			gen_default(arg_list, scopedepth); /* generate arg_list's code */
+			/* in gen_variable already push on top of stack !!!!!*/
 			/* caller saves return address in link register*/
 				/* use bl to automate this link register's saving */
 			/* caller jumps to called function address */
@@ -254,10 +250,22 @@ void gen_VARIABLE(node_t *root, int scopedepth) {
 	tracePrint("Starting VARIABLE\n");
 	assert(root);
 	assert(root->entry);
-    instruction_add(LDR, r3, fp, 0, root->entry->stack_offset);
-    /* push the value on top of stack for possible assignement, as rhs value/constant ? */
-    /* or just for evaluating nesting arithmetic/logic expressions */
-    instruction_add(PUSH, r3, NULL, 0, 0);
+	if(root->entry->stack_offset < 0){
+		/* local variables */
+		instruction_add(LDR, r3, fp, 0, root->entry->stack_offset);
+		/* push the value on top of stack for possible assignement, as rhs value/constant ? */
+		/* or just for evaluating nesting arithmetic/logic expressions */
+		instruction_add(PUSH, r3, NULL, 0, 0);
+	}else if(root->entry->stack_offset > 0){
+		/* function arguments take them as consts*/
+		tracePrint("\t arguments generation, reuse gen_CONST part! enter");
+		gen_CONSTANT(root, scopedepth);
+		tracePrint("\t arguments generation, reuse gen_CONST part! leave");
+	}else{
+		tracePrint("error! variable with 0 stack offset!");
+		return;
+	}
+
 	tracePrint("End VARIABLE %s, depth difference: %d, stack offset: %d\n",
 			root->label, 0, root->entry->stack_offset);
 	scopedepth--;
@@ -267,7 +275,7 @@ void gen_CONSTANT(node_t * root, int scopedepth) {
 	scopedepth++;// keep compiler happy
 	tracePrint("Starting CONSTANT\n");
 	assert(root);
-	assert(root->nodetype.index == CONSTANT);
+	//assert(root->nodetype.index == CONSTANT);
 	char const2str[50] = {0};
 	switch (root->data_type.base_type) {
 		case INT_TYPE:
@@ -305,6 +313,7 @@ void gen_CONSTANT(node_t * root, int scopedepth) {
 		default:
 		break;
 	}
+	instruction_add(PUSH, r3, NULL, 0, 0);
 	tracePrint("End CONSTANT\n");
 	scopedepth--;
 }
