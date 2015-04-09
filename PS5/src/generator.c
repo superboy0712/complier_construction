@@ -144,7 +144,11 @@ void gen_FUNCTION(node_t *root, int scopedepth) {
 	scopedepth++;
 	tracePrint("Starting FUNCTION (%s) with depth %d\n", root->label,
 			scopedepth);
-
+	/**
+	 * function
+	 *	--parameter_list
+	 *	--statement_list
+	 */
 	/* shall we deal with the registers saving and parameters passing here from caller? */
 	/* make label */
 	instruction_add(LABEL, root->function_entry->label, NULL, 0, 0);
@@ -153,7 +157,8 @@ void gen_FUNCTION(node_t *root, int scopedepth) {
 	instruction_add(PUSH, fp, NULL, 0, 0);
 	instruction_add(MOV, fp, sp, 0, 0);
 	/* generate code for body of function */
-	gen_default(root, scopedepth);
+	assert(root->n_children == 2);
+	gen_default(root->children[1], scopedepth);/*!< bypass parameter_list node, avoid stack redecalration*/
 	/* remove stack frame, jump to retrun address */
 	instruction_add(MOV, sp, fp, 0, 0);
 	instruction_add(POP, fp, NULL, 0, 0);
@@ -250,21 +255,11 @@ void gen_VARIABLE(node_t *root, int scopedepth) {
 	tracePrint("Starting VARIABLE\n");
 	assert(root);
 	assert(root->entry);
-	if(root->entry->stack_offset < 0){
 		/* local variables */
 		instruction_add(LDR, r3, fp, 0, root->entry->stack_offset);
 		/* push the value on top of stack for possible assignement, as rhs value/constant ? */
 		/* or just for evaluating nesting arithmetic/logic expressions */
 		instruction_add(PUSH, r3, NULL, 0, 0);
-	}else if(root->entry->stack_offset > 0){
-		/* function arguments take them as consts*/
-		tracePrint("\t arguments generation, reuse gen_CONST part! enter");
-		gen_CONSTANT(root, scopedepth);
-		tracePrint("\t arguments generation, reuse gen_CONST part! leave");
-	}else{
-		tracePrint("error! variable with 0 stack offset!");
-		return;
-	}
 
 	tracePrint("End VARIABLE %s, depth difference: %d, stack offset: %d\n",
 			root->label, 0, root->entry->stack_offset);
