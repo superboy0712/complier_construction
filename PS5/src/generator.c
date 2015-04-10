@@ -338,7 +338,7 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 	instruction_add(POP, r3, NULL, 0, 0);
 	assert(root->children[0]->entry);
 	/* STORE to lvalue's address */
-	instruction_add(STR, fp, r3, root->children[0]->entry->stack_offset, 0);
+	instruction_add(STR, r3, fp, 0, root->children[0]->entry->stack_offset);
 	/* restore stack, also pop lvalue(garbage) */
 	instruction_add3(ADD, sp, sp, "#4");
 	tracePrint("End ASSIGNMENT_STATEMENT\n");

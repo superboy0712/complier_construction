@@ -2,6 +2,7 @@ VOID FUNC main() START
     INT a;
     INT b;
     a := 5;
+	PRINT a;
     b := func(a);
     PRINT a, b;
 END
