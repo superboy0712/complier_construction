@@ -217,7 +217,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 			}
 
 			/* caller saves registers on stack */
-			instruction_add(STRING, STRDUP("\tpush {r0, r1, r2, r3}"), NULL, 0, 0);
+			//instruction_add(STRING, STRDUP("\tpush {r0, r1, r2, r3}"), NULL, 0, 0);
 			/* caller pushes parameters on stack */
 			gen_default(arg_list, scopedepth); /* generate arg_list's code */
 				/* in gen_variable/constant already push on top of stack !!!!!*/
@@ -237,7 +237,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				sprintf(const2str, "#%d", 4*(arg_list->n_children));
 				instruction_add3(ADD, sp, sp, STRDUP(const2str));
 			}
-			instruction_add(STRING, STRDUP("\tpop {r0, r1, r2, r3}"), NULL, 0, 0);
+			//instruction_add(STRING, STRDUP("\tpop {r0, r1, r2, r3}"), NULL, 0, 0);
 			/* use results, push the value on top of stack, assuming return value on r0 */
 			instruction_add(PUSH, r0, NULL, 0, 0);
 		}
