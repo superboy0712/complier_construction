@@ -666,7 +666,7 @@ static void instructions_print(FILE *stream) {
 
 		case BL:
 			fprintf(stream, "\tbl\t");
-			fprintf(stream, "%s\n", this->operands[0]);
+			fprintf(stream, "_%s\n", this->operands[0]);
 			break;
 		case LABEL:
 			fprintf(stream, "_%s:\n", this->operands[0]);
