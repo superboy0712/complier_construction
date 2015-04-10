@@ -11,11 +11,13 @@ VOID FUNC main() START
     
     INT e;
     INT f;
-    
+    FLOAT g;
     e := func1(a, b, c);
     f := func2(a, b, c, d, e);
-    
-    PRINT e,f;
+    g := 3.0;
+    PRINT e,f, TRUE, FALSE;
+	PRINT g, 1, 250, 4.232;
+	PRINT "HELLO";
 END
 
 INT FUNC func1(INT x, INT y, INT z) START

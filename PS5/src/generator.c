@@ -247,7 +247,19 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 		 */
 		case NEW_E:
 		{
+			/**
+			 * simplified node of array type
+			 * -data_type.base = ARRAY_TYPE
+			 * -data_type.array_type = INT_TYPE
+			 * -data_type.n_dimensions = 2
+			 * -data_type.dimensions = [3,3]
+			 */
+			assert(root->n_children==1);
+			assert(root->children[0]);
+			if(root->children[0]->data_type.base_type == ARRAY_TYPE){
+				/* ARRAY TYPE OF INT */
 
+			}
 		}
 		break;
 		default:
@@ -277,7 +289,10 @@ void gen_VARIABLE(node_t *root, int scopedepth) {
 			root->label, 0, root->entry->stack_offset);
 	scopedepth--;
 }
-
+typedef union ufloat {
+	float f;
+	uint32_t u;
+} ufloat_t;
 void gen_CONSTANT(node_t * root, int scopedepth) {
 	scopedepth++;// keep compiler happy
 	tracePrint("Starting CONSTANT\n");
@@ -312,8 +327,9 @@ void gen_CONSTANT(node_t * root, int scopedepth) {
 		case FLOAT_TYPE:
 		{
 			tracePrint("\tFLOAT\n");
-			int32_t value = (int32_t)root->float_const;
-			sprintf(const2str,"#0x%X",value);
+			ufloat_t value;
+			value.f = root->float_const;
+			sprintf(const2str,"#0x%X",value.u);
 			instruction_add(MOVE32, r3, STRDUP(const2str), 0, 0);
 		}
 		break;
