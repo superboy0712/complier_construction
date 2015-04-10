@@ -123,7 +123,8 @@ void gen_PROGRAM(node_t *root, int scopedepth) {
 	node_t *node_ptr = root->children[0];
 	if (node_ptr != NULL) {
 		if (node_ptr->children[0] != NULL) {
-			char *func_label = node_ptr->children[0]->function_entry->label;
+			char func_label[50] = {0};
+			sprintf(func_label, "_%s", node_ptr->children[0]->function_entry->label);
 			/* caller saves registers on stack */
 			//instruction_add(STRING, STRDUP("\tpush {fp, lr}"), NULL, 0, 0);
 			/* branch and link */
@@ -225,7 +226,8 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 			/* caller saves return address in link register*/
 				/* use bl to automate this link register's saving */
 			/* caller jumps to called function address */
-			char *func_label = root->function_entry->label;
+			char func_label[50] = {0};
+			sprintf(func_label, "_%s", root->function_entry->label);
 			instruction_add(BL, STRDUP(func_label), NULL, 0, 0);
 			/* block until return from callee */
 
@@ -666,7 +668,7 @@ static void instructions_print(FILE *stream) {
 
 		case BL:
 			fprintf(stream, "\tbl\t");
-			fprintf(stream, "_%s\n", this->operands[0]);
+			fprintf(stream, "%s\n", this->operands[0]);
 			break;
 		case LABEL:
 			fprintf(stream, "_%s:\n", this->operands[0]);
