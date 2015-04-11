@@ -175,7 +175,15 @@ void gen_debug_print(void){
 }
 void gen_debug_mem_print(void){
 	/* get the argument: address of mem */
-	instruction_add(LDR, r0, fp, 0, -8);
+	//instruction_add(LDR, r0, fp, 0, 0);
+	//gen_debug_print();
+	instruction_add(MOV, r0, r3, 0, 0);
+	//instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
+	//gen_debug_print();
+	/**
+	 * now r0 is address
+	 */
+	instruction_add(LDR, r0, r0, 0, 0);
 	instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
 }
 void gen_FUNCTION(node_t *root, int scopedepth) {
@@ -393,18 +401,22 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				 *
 				 *   var = address of Array's first level dimension's head
 				 */
-				//root->children[0]->data_type.base_type = INT_TYPE;/* make the address printable*/
 				/* calculate element's address = variable+4*x */
 				instruction_add(POP, r3, NULL, 0, 0);/* r3 <=var */
 				instruction_add(POP, r2, NULL, 0, 0);/* x */
+				instruction_add(MOV, r0, r2, 0, 0);
+				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
 				//instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
 				//instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
+
 				instruction_add3(LSL, r2, r2, STRDUP("#2"));/* or can use left shift */
 				instruction_add3(ADD, r3, r3, r2);
 				instruction_add(PUSH, r3, NULL, 0, 0);
 				/**
 				 *  sp-> var+4*x|y|z...
 				 */
+				instruction_add(MOV, r0, r2, 0, 0);
+				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
 			}
 		}
 		break;

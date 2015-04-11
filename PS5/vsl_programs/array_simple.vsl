@@ -24,13 +24,12 @@ VOID FUNC arrayTest() START
 	PRINT "array after new is ", array;
 	PRINT "array before new is ", array; // failed. why.
 	array := NEW INT ARRAY[24];
-	debug_registers_print();
-	a := array[1];
-	debug_registers_print();
 	PRINT "array after new is ", array;
-	PRINT "array[0] is ", array[0];
-	debug_registers_print();
-	debug_mem_print(12345);
+	//PRINT "array[0] is ", array[0];
+	array[1] := array[1];
+	//a := array[0];
+	//array[0] := a;
+	
 END
 
 VOID FUNC debug_registers_print() START
@@ -39,5 +38,6 @@ END
 
 VOID FUNC debug_mem_print( INT address) START
 	PRINT "debug_mem_print( ", address, ")";
+	address := address;// for passing argument
 END
 
