@@ -406,8 +406,6 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				instruction_add(POP, r2, NULL, 0, 0);/* x */
 				instruction_add(MOV, r0, r2, 0, 0);
 				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
-				//instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
-				//instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
 
 				instruction_add3(LSL, r2, r2, STRDUP("#2"));/* or can use left shift */
 				instruction_add3(ADD, r3, r3, r2);
