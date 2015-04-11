@@ -8,7 +8,7 @@ VOID FUNC arrayTest() START
     INT ARRAY [10] Carray;
 	INT ARRAY [10] array;
 	array := NEW INT ARRAY[10];
-	//PRINT array; // failed. why.
+	PRINT array; // failed. why.
 	//PRINT(NEW FLOAT ARRAY[3]);
 	PRINT "ZERO";
 	PRINT array[0];
