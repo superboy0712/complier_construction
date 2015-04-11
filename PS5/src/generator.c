@@ -174,10 +174,10 @@ void gen_ARRAY(int nDimensions, int* dimensions) {
 
 	/** allocate from outtermost dimension, pre-allocation, post-assignment */
 	/* caller saves registers on stack */
-	instruction_add(STRING, STRDUP("\tpush {r4-r11}"), NULL, 0, 0);
+	instruction_add(STRING, STRDUP("\tpush\t{r4-r11}"), NULL, 0, 0);
 	/* caller pushes parameters on stack */
 	char const2str[50] = {0};
-	sprintf(const2str, "#%d", *dimensions);
+	sprintf(const2str, "#%d", (dimensions[0])*4);
 	instruction_add(MOVE32, r3, STRDUP(const2str), 0, 0);
 	instruction_add(PUSH, r3, NULL, 0, 0);
 	/* caller jumps to called function address */
@@ -185,14 +185,14 @@ void gen_ARRAY(int nDimensions, int* dimensions) {
 	/* caller removes parameters, restores registers */
 	sprintf(const2str, "#%d", 4);
 	instruction_add3(ADD, sp, sp, STRDUP(const2str));
-	instruction_add(STRING, STRDUP("\tpop {r4-r11}"), NULL, 0, 0);
+	instruction_add(STRING, STRDUP("\tpop\t{r4-r11}"), NULL, 0, 0);
 	/* use results, push the value/ptr on top of stack, assuming return value on r0 */
 	instruction_add(PUSH, r0, NULL, 0, 0);
 
 //	if(nDimensions!=1){
 //		gen_ARRAY(nDimensions-1, dimensions+1);
 //	}
-
+	nDimensions = 1;
 }
 void gen_DECLARATION_STATEMENT(node_t *root, int scopedepth) {
 	scopedepth++;
@@ -313,13 +313,13 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				 *  sp-> var+4*x|y|z...
 				 */
 				/* aquire the address of var[x][y] */
-				instruction_add(POP, r3, NULL, 0, 0);/* r3 <= var+4*x */
+				instruction_add(POP, r0, NULL, 0, 0);/* r0 <= var+4*x */
 				instruction_add(POP, r2, NULL, 0, 0);/* r2 <= y */
-				instruction_add(LDR, r3, r3, 0, 0); /* r3 <= [r3] */
+				instruction_add(LDR, r3, r0, 0, 0); /* r3 <= [r0] */
 				instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
 				instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
 				//instruction_add3(LSL, r2, r2, STRDUP("#2"));/* r2 <= 4*y, or can use left shift */
-				instruction_add3(ADD, r3, r3, r2);/* r3 <= [var+4*x]+4*y */
+				instruction_add3(ADD, r3, r3, r2);/* r3 <= [[var]+4*x]+4*y */
 				instruction_add(PUSH, r3, NULL, 0, 0);
 				/**
 				 *  sp-> [var+4*x]+4*y|z...
@@ -335,9 +335,11 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				 *        \variable(var)
 				 *
 				 *   sp-> var|x|y|z...
+				 *
+				 *   var = address of Array's first level dimension's head
 				 */
 				/* calculate element's address = variable+4*x */
-				instruction_add(POP, r3, NULL, 0, 0);/* var */
+				instruction_add(POP, r3, NULL, 0, 0);/* r3 <=var */
 				instruction_add(POP, r2, NULL, 0, 0);/* x */
 				instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
 				instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
