@@ -173,6 +173,11 @@ void gen_debug_print(void){
 	instruction_add(STRING, STRDUP("\tpop \t{r0-r11, lr}"), NULL, 0, 0);
 	tracePrint("Ending gen_debug_print\n");
 }
+void gen_debug_mem_print(void){
+	/* get the argument: address of mem */
+	instruction_add(LDR, r0, fp, 0, -8);
+	instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
+}
 void gen_FUNCTION(node_t *root, int scopedepth) {
 	scopedepth++;
 	tracePrint("Starting FUNCTION (%s) with depth %d\n", root->label,
@@ -192,6 +197,10 @@ void gen_FUNCTION(node_t *root, int scopedepth) {
 		/* generate code for body of function */
 		assert(root->n_children == 2);
 		gen_default(root->children[1], scopedepth);/*!< bypass parameter_list node, avoid stack redecalration*/
+		/* special code injection */
+		if(strcmp(root->function_entry->label, "debug_mem_print")){
+			gen_debug_mem_print();
+		}
 		/* remove stack frame, jump to retrun address */
 		instruction_add(MOV, sp, fp, 0, 0);
 		instruction_add(POP, fp, NULL, 0, 0);
