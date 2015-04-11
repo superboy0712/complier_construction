@@ -1,4 +1,5 @@
 VOID FUNC arrayTest() START
+	debug_registers_print();
 	INT a;
 	INT b;
 	a := 66;
@@ -10,8 +11,10 @@ VOID FUNC arrayTest() START
 	array := NEW INT ARRAY[24];
 //	b := array; type checking. 
 	PRINT a, b;
+	debug_registers_print();
 	PRINT "array before new is ", array; // failed. why.
 	array := NEW INT ARRAY[24];
+	debug_registers_print();
 	PRINT "array after new is ", array;
 	PRINT "array before new is ", array; // failed. why.
 	array := NEW INT ARRAY[24];
@@ -21,5 +24,15 @@ VOID FUNC arrayTest() START
 	PRINT "array after new is ", array;
 	PRINT "array before new is ", array; // failed. why.
 	array := NEW INT ARRAY[24];
+	debug_registers_print();
+	a := array[1];
+	debug_registers_print();
 	PRINT "array after new is ", array;
+	PRINT "array[0] is ", array[0];
+	debug_registers_print();
 END
+
+VOID FUNC debug_registers_print() START
+	INT a;// dummy statement, just for injecting my code
+END
+

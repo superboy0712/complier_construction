@@ -140,7 +140,39 @@ void gen_PROGRAM(node_t *root, int scopedepth) {
 		instructions_print( stdout);
 	instructions_finalize();
 }
+void gen_debug_print(void){
+	tracePrint("Starting gen_debug_print\n");
+	instruction_add(STRING, STRDUP("\tpush \t{r0-r11, lr}"), NULL, 0, 0);
+	instruction_add(PUSH, r0, NULL, 0, 0);
+	instruction_add(PUSH, r1, NULL, 0, 0);
+	instruction_add(PUSH, r2, NULL, 0, 0);
+	instruction_add(PUSH, r3, NULL, 0, 0);
+	/* parameter preparation */
+	instruction_add(PUSH, r6, NULL, 0, 0);
+	instruction_add(POP, r6, NULL, 0, 0);
+	char const2str[50]= {0};
+	//sprintf(const2str, "#0x%X", (int)(STRDUP(name)));/* address of printing name */
+	instruction_add(MOVE32, r0, STRDUP("string_of_gen_debug_print"), 0, 0);
+	instruction_add(BL, STRDUP("printf"), NULL, 0, 0);
+	// register value printing
 
+	for (int i = 0; i < 4; ++i) {
+		//sprintf(const2str, "#0x%X", (int)(STRDUP(name)));
+		instruction_add(STRING, STRDUP("\tmovw  r0, #:lower16:.INTEGER"),
+				NULL, 0, 0);
+		instruction_add(STRING, STRDUP("\tmovt  r0, #:upper16:.INTEGER"),
+				NULL, 0, 0);
+		instruction_add(POP, r1, NULL, 0, 0);/* r1, is the right parameter list */
+		instruction_add(BL, STRDUP("printf"), NULL, 0, 0);
+	}
+
+	/* finished */
+	instruction_add(MOVE32, r0, STRDUP("0x0A"), 0, 0);
+	instruction_add(BL, STRDUP("putchar"), NULL, 0, 0);
+	/* recover stack */
+	instruction_add(STRING, STRDUP("\tpop \t{r0-r11, lr}"), NULL, 0, 0);
+	tracePrint("Ending gen_debug_print\n");
+}
 void gen_FUNCTION(node_t *root, int scopedepth) {
 	scopedepth++;
 	tracePrint("Starting FUNCTION (%s) with depth %d\n", root->label,
@@ -150,21 +182,35 @@ void gen_FUNCTION(node_t *root, int scopedepth) {
 	 *	--parameter_list
 	 *	--statement_list
 	 */
-	/* shall we deal with the registers saving and parameters passing here from caller? */
-	/* make label */
-	instruction_add(LABEL, root->function_entry->label, NULL, 0, 0);
-	/* set up stack frame */
-	instruction_add(PUSH, lr, NULL, 0, 0);
-	instruction_add(PUSH, fp, NULL, 0, 0);
-	instruction_add(MOV, fp, sp, 0, 0);
-	/* generate code for body of function */
-	assert(root->n_children == 2);
-	gen_default(root->children[1], scopedepth);/*!< bypass parameter_list node, avoid stack redecalration*/
-	/* remove stack frame, jump to retrun address */
-	instruction_add(MOV, sp, fp, 0, 0);
-	instruction_add(POP, fp, NULL, 0, 0);
-	instruction_add(POP, pc, NULL, 0, 0);
-
+	if(strcmp(root->function_entry->label, "debug_registers_print")){
+		/* make label */
+		instruction_add(LABEL, root->function_entry->label, NULL, 0, 0);
+		/* set up stack frame */
+		instruction_add(PUSH, lr, NULL, 0, 0);
+		instruction_add(PUSH, fp, NULL, 0, 0);
+		instruction_add(MOV, fp, sp, 0, 0);
+		/* generate code for body of function */
+		assert(root->n_children == 2);
+		gen_default(root->children[1], scopedepth);/*!< bypass parameter_list node, avoid stack redecalration*/
+		/* remove stack frame, jump to retrun address */
+		instruction_add(MOV, sp, fp, 0, 0);
+		instruction_add(POP, fp, NULL, 0, 0);
+		instruction_add(POP, pc, NULL, 0, 0);
+	}else{
+		/* generate special debugging functions */
+		/* make label */
+		instruction_add(LABEL, root->function_entry->label, NULL, 0, 0);
+		/* set up stack frame */
+		instruction_add(PUSH, lr, NULL, 0, 0);
+		instruction_add(PUSH, fp, NULL, 0, 0);
+		instruction_add(MOV, fp, sp, 0, 0);
+		/* generate code for body of function */
+		gen_debug_print();
+		/* remove stack frame, jump to retrun address */
+		instruction_add(MOV, sp, fp, 0, 0);
+		instruction_add(POP, fp, NULL, 0, 0);
+		instruction_add(POP, pc, NULL, 0, 0);
+	}
 	tracePrint("Leaving FUNCTION (%s) with depth %d\n", root->label,
 			scopedepth);
 	scopedepth--;
@@ -318,7 +364,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				instruction_add(LDR, r3, r0, 0, 0); /* r3 <= [r0] */
 				instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
 				instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
-				//instruction_add3(LSL, r2, r2, STRDUP("#2"));/* r2 <= 4*y, or can use left shift */
+				instruction_add3(LSL, r2, r2, STRDUP("#2"));/* r2 <= 4*y, or can use left shift */
 				instruction_add3(ADD, r3, r3, r2);/* r3 <= [[var]+4*x]+4*y */
 				instruction_add(PUSH, r3, NULL, 0, 0);
 				/**
@@ -860,6 +906,11 @@ static void instructions_print(FILE *stream) {
 void print_start() {
 	// Start of assemlby program
 	// Debug functions and system call wrappers
+	instruction_add(STRING, STRDUP("\nstring_of_gen_debug_print: .ascii \"Debug print register is \""), NULL, 0, 0);
+	instruction_add(STRING, STRDUP(".ascii \"\\000\"\n"), NULL, 0, 0);
+	instruction_add(STRING, STRDUP(".ascii \"\\000\"\n"), NULL, 0, 0);
+	instruction_add(STRING, STRDUP(".ascii \"\\000\"\n"), NULL, 0, 0);
+	instruction_add(STRING, STRDUP(".ascii \"\\000\"\n"), NULL, 0, 0);
 	instruction_add(STRING, STRDUP("debugprint:"), NULL, 0, 0);
 	instruction_add(STRING, STRDUP("\tpush {r0-r11, lr}"), NULL, 0, 0);
 	instruction_add(STRING, STRDUP("\tmovw	r0, #:lower16:.DEBUG"), NULL, 0, 0);
