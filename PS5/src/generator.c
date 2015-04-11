@@ -407,7 +407,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
 
 				char a[20];
-				fprintf(a, "#%d", right->int_const);
+				sprintf(a, "#%d", right->int_const);
 				instruction_add(MOV, r0, STRDUP(a), 0, 0);
 				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
 
@@ -454,15 +454,18 @@ void gen_VARIABLE(node_t *root, int scopedepth) {
 	tracePrint("Starting VARIABLE\n");
 	assert(root);
 	assert(root->entry);
-		/* local variables or arguments */
+
+	if(root->data_type.base_type != NO_TYPE){
+	/* bypass the array_index's variable node */
 		if(root->entry->stack_offset>0){
+			/* local variables or arguments */
 			tracePrint("\tI am an argument passing to a function!\n");
 		}
 		instruction_add(LDR, r3, fp, 0, root->entry->stack_offset);
 		/* push the value on top of stack for possible assignement, as rhs value/constant ? */
 		/* or just for evaluating nesting arithmetic/logic expressions */
 		instruction_add(PUSH, r3, NULL, 0, 0);
-
+	}
 	tracePrint("End VARIABLE %s, depth difference: %d, stack offset: %d\n",
 			root->label, 0, root->entry->stack_offset);
 	scopedepth--;
