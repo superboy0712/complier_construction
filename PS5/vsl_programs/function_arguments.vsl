@@ -14,7 +14,7 @@ VOID FUNC main() START
     FLOAT g;
     e := func1(a, b, c);
     f := func2(a, b, c, d, e);
-    g := 3.0;
+    g := 3.14159212314;
     PRINT e,f, TRUE, FALSE;
 	PRINT g, 1, 250, 4.232;
 	PRINT "HELLO";

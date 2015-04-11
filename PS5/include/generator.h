@@ -16,7 +16,9 @@ typedef enum {
 	CMP, // Compare
 
 	// Floating point
-	CVTSD,LOADS, STORES, FADD, FSUB, FMUL, FDIV, FCMP, MOVES, MOVED, FNEG
+	CVTSD,LOADS, STORES, FADD, FSUB, FMUL, FDIV, FCMP, MOVES, MOVED, FNEG,
+	// Logic shift
+	LSL
 } opcode_t;
 
 /* A struct to make linked lists from instructions */

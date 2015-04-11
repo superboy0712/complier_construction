@@ -172,6 +172,27 @@ void gen_FUNCTION(node_t *root, int scopedepth) {
 
 void gen_ARRAY(int nDimensions, int* dimensions) {
 
+	/** allocate from outtermost dimension, pre-allocation, post-assignment */
+	/* caller saves registers on stack */
+	instruction_add(STRING, STRDUP("\tpush {r4-r11}"), NULL, 0, 0);
+	/* caller pushes parameters on stack */
+	char const2str[50] = {0};
+	sprintf(const2str, "#%d", *dimensions);
+	instruction_add(MOVE32, r3, STRDUP(const2str), 0, 0);
+	instruction_add(PUSH, r3, NULL, 0, 0);
+	/* caller jumps to called function address */
+	instruction_add(BL, STRDUP("_malloc"), NULL, 0, 0);
+	/* caller removes parameters, restores registers */
+	sprintf(const2str, "#%d", 4);
+	instruction_add3(ADD, sp, sp, STRDUP(const2str));
+	instruction_add(STRING, STRDUP("\tpop {r4-r11}"), NULL, 0, 0);
+	/* use results, push the value/ptr on top of stack, assuming return value on r0 */
+	instruction_add(PUSH, r0, NULL, 0, 0);
+
+//	if(nDimensions!=1){
+//		gen_ARRAY(nDimensions-1, dimensions+1);
+//	}
+
 }
 void gen_DECLARATION_STATEMENT(node_t *root, int scopedepth) {
 	scopedepth++;
@@ -217,7 +238,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 			}
 
 			/* caller saves registers on stack */
-			instruction_add(STRING, STRDUP("\tpush {r4-r11}"), NULL, 0, 0);
+			instruction_add(STRING, STRDUP("\tpush \t{r4-r11}"), NULL, 0, 0);
 			/* caller pushes parameters on stack */
 			gen_default(arg_list, scopedepth); /* generate arg_list's code */
 				/* in gen_variable/constant already push on top of stack !!!!!*/
@@ -233,11 +254,11 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 
 			/* caller removes parameters, restores registers */
 			/* all parameters are 4 bytes long, just increase sp */
-			if(root->children[1]){
+			if(root->children[1]){/** MAY HAVE ZERO ARGUMENTS */
 				sprintf(const2str, "#%d", 4*(arg_list->n_children));
 				instruction_add3(ADD, sp, sp, STRDUP(const2str));
 			}
-			instruction_add(STRING, STRDUP("\tpop {r4-r11}"), NULL, 0, 0);
+			instruction_add(STRING, STRDUP("\tpop \t{r4-r11}"), NULL, 0, 0);
 			/* use results, push the value on top of stack, assuming return value on r0 */
 			instruction_add(PUSH, r0, NULL, 0, 0);
 		}
@@ -257,8 +278,75 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 			assert(root->n_children==1);
 			assert(root->children[0]);
 			if(root->children[0]->data_type.base_type == ARRAY_TYPE){
-				/* ARRAY TYPE OF INT */
-
+				/* ARRAY TYPE OF any four bytes long */
+				gen_ARRAY(root->children[0]->data_type.n_dimensions,
+						root->children[0]->data_type.dimensions);
+			}else{
+				gen_default(root, scopedepth);
+			}
+		}
+		break;
+		/**
+		 * \brief Array access
+		 * lvalue := expr '[' expr ']'
+		 */
+		case ARRAY_INDEX_E:
+		{
+			/**
+			 * idx-expr
+			 * 	\idx-expr
+			 * 	  \...
+			 * 	    \variable
+			 *
+			 * 	now expr := INT_CONST, NOT YET including arithmetic expressions
+			 */
+			/** TODO why not flatten/simplify array_index_expression? */
+			assert(root->n_children==2);
+			assert(root->children[0]);
+			if(root->children[0]->nodetype.index != variable_n.index){
+				/* if left child is not a variable node, then recursively traverse into/down */
+				/* left child must be ARRAY_INDEX_E */
+				assert(root->children[0]->expression_type.index == ARRAY_INDEX_E);
+				gen_default(root, scopedepth);
+				/* calculate my address based upon my children */
+				/**
+				 *  sp-> var+4*x|y|z...
+				 */
+				/* aquire the address of var[x][y] */
+				instruction_add(POP, r3, NULL, 0, 0);/* r3 <= var+4*x */
+				instruction_add(POP, r2, NULL, 0, 0);/* r2 <= y */
+				instruction_add(LDR, r3, r3, 0, 0); /* r3 <= [r3] */
+				instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
+				instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
+				//instruction_add3(LSL, r2, r2, STRDUP("#2"));/* r2 <= 4*y, or can use left shift */
+				instruction_add3(ADD, r3, r3, r2);/* r3 <= [var+4*x]+4*y */
+				instruction_add(PUSH, r3, NULL, 0, 0);
+				/**
+				 *  sp-> [var+4*x]+4*y|z...
+				 */
+			}else{
+				/* left child is variable, the innermost one */
+				/* but in the assign function which already applied the gen_VARIABLE */
+				/**
+				 * the stack layout for var[x][y][z] should be like
+				 *  idx-expr(z)
+				 *    \idx-expr(y)
+				 *      \idx-expr(x)
+				 *        \variable(var)
+				 *
+				 *   sp-> var|x|y|z...
+				 */
+				/* calculate element's address = variable+4*x */
+				instruction_add(POP, r3, NULL, 0, 0);/* var */
+				instruction_add(POP, r2, NULL, 0, 0);/* x */
+				instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
+				instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
+				//instruction_add3(LSL, r2, r2, STRDUP("#2"));/* or can use left shift */
+				instruction_add3(ADD, r3, r3, r2);
+				instruction_add(PUSH, r3, NULL, 0, 0);
+				/**
+				 *  sp-> var+4*x|y|z...
+				 */
 			}
 		}
 		break;
@@ -350,13 +438,39 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 	assert(root->n_children == 2);
 	assert(root->nodetype.index == assignment_statement_n.index);
 	gen_default(root, scopedepth);
-	/* pop rvalue */
-	instruction_add(POP, r3, NULL, 0, 0);
-	assert(root->children[0]->entry);
-	/* STORE to lvalue's address */
-	instruction_add(STR, r3, fp, 0, root->children[0]->entry->stack_offset);
-	/* restore stack, also pop lvalue(garbage) */
-	instruction_add3(ADD, sp, sp, "#4");
+	/* acquire rvalue */
+	if(root->children[1]->expression_type.index != array_index_e.index){
+		/**
+		 *  common rvalue
+		 */
+		instruction_add(POP, r3, NULL, 0, 0);
+	}else{
+		/**
+		 * rvalue is array_index_e
+		 */
+		instruction_add(POP, r2, NULL, 0, 0);
+		instruction_add(LDR, r3, r2, 0, 0); /* r3 <= [r2] */
+	}
+	/* now rvalue is at r3 */
+
+	/* store rvalue in address of lhs*/
+	if(root->children[0]->expression_type.index != array_index_e.index){
+		/** common lvalue expression */
+		assert(root->children[0]->entry);
+		/* STORE to lvalue's address */
+		instruction_add(STR, r3, fp, 0, root->children[0]->entry->stack_offset);
+		/* restore stack, also pop lvalue(garbage) */
+		instruction_add3(ADD, sp, sp, "#4");
+	}else{
+		/**
+		 *  lvalue is array_index_expression
+		 */
+		// get the lvalue's address
+		instruction_add(POP, r2, NULL, 0, 0);
+		// assign to
+		instruction_add(STR, r3, r2, 0, 0);
+	}
+
 	tracePrint("End ASSIGNMENT_STATEMENT\n");
 }
 
@@ -710,6 +824,11 @@ static void instructions_print(FILE *stream) {
 			break;
 
 		case NIL:
+			break;
+
+		case LSL:
+			fprintf(stream, "\tlsl\t%s, %s, %s\n", this->operands[0],
+					this->operands[1], this->operands[2]);
 			break;
 
 		default:
