@@ -30,6 +30,7 @@ VOID FUNC arrayTest() START
 	PRINT "array after new is ", array;
 	PRINT "array[0] is ", array[0];
 	debug_registers_print();
+	debug_mem_print(12345);
 END
 
 VOID FUNC debug_registers_print() START
@@ -37,6 +38,6 @@ VOID FUNC debug_registers_print() START
 END
 
 VOID FUNC debug_mem_print( INT address) START
-	INT a;// dummy statement, just for injecting my code
+	PRINT "debug_mem_print( ", address, ")";
 END
 
