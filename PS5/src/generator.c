@@ -370,20 +370,20 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				/* if left child is not a variable node, then recursively traverse into/down */
 				/* left child must be ARRAY_INDEX_E */
 				assert(root->children[0]->expression_type.index == ARRAY_INDEX_E);
-				gen_default(root, scopedepth);
+				gen_default(root->children[0], scopedepth);
 				/* calculate my address based upon my children */
 				/**
 				 *  sp-> var+4*x|y|z...
 				 */
 				/* aquire the address of var[x][y] */
-				instruction_add(POP, r0, NULL, 0, 0);/* r0 <= var+4*x */
-				instruction_add(POP, r2, NULL, 0, 0);/* r2 <= y */
-				instruction_add(LDR, r3, r0, 0, 0); /* r3 <= [r0] */
-				instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
-				instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
-				instruction_add3(LSL, r2, r2, STRDUP("#2"));/* r2 <= 4*y, or can use left shift */
-				instruction_add3(ADD, r3, r3, r2);/* r3 <= [[var]+4*x]+4*y */
-				instruction_add(PUSH, r3, NULL, 0, 0);
+//				instruction_add(POP, r0, NULL, 0, 0);/* r0 <= var+4*x */
+//				instruction_add(POP, r2, NULL, 0, 0);/* r2 <= y */
+//				instruction_add(LDR, r3, r0, 0, 0); /* r3 <= [r0] */
+//				instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
+//				instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
+//				instruction_add3(LSL, r2, r2, STRDUP("#2"));/* r2 <= 4*y, or can use left shift */
+//				instruction_add3(ADD, r3, r3, r2);/* r3 <= [[var]+4*x]+4*y */
+//				instruction_add(PUSH, r3, NULL, 0, 0);
 				/**
 				 *  sp-> [var+4*x]+4*y|z...
 				 */
@@ -401,13 +401,30 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				 *
 				 *   var = address of Array's first level dimension's head
 				 */
+				node_t *left = root->children[0];
+				node_t *right = root->children[1];
+				instruction_add(LDR, r0, fp, 0, left->entry->stack_offset);
+				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
+
+
+				instruction_add(LDR, r0, sp, 0, 0);
+				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
+
+//				instruction_add(LDR, r0, sp, 0, 4);
+//				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
+//
+//				instruction_add(LDR, r0, sp, 0, 8);
+//				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
 				/* calculate element's address = variable+4*x */
 				instruction_add(POP, r3, NULL, 0, 0);/* r3 <=var */
+				instruction_add(MOV, r0, r3, 0, 0);
+				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
+
 				instruction_add(POP, r2, NULL, 0, 0);/* x */
 				instruction_add(MOV, r0, r2, 0, 0);
 				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
 
-				instruction_add3(LSL, r2, r2, STRDUP("#2"));/* or can use left shift */
+				instruction_add3(LSL, r2, r2, STRDUP("#2"));
 				instruction_add3(ADD, r3, r3, r2);
 				instruction_add(PUSH, r3, NULL, 0, 0);
 				/**
@@ -415,6 +432,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				 */
 				instruction_add(MOV, r0, r2, 0, 0);
 				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
+
 			}
 		}
 		break;

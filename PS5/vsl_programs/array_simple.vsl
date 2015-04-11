@@ -5,8 +5,8 @@ VOID FUNC arrayTest() START
 	a := 66;
 	b := 44;
 	PRINT a, b;
-	INT ARRAY [10] Barray;
-    INT ARRAY [10] Carray;
+	INT ARRAY [24] Barray;
+    INT ARRAY [24] Carray;
 	INT ARRAY [24] array;
 	array := NEW INT ARRAY[24];
 //	b := array; type checking. 
@@ -25,8 +25,8 @@ VOID FUNC arrayTest() START
 	PRINT "array before new is ", array; // failed. why.
 	array := NEW INT ARRAY[24];
 	PRINT "array after new is ", array;
-	//PRINT "array[0] is ", array[0];
-	array[1] := array[1];
+	PRINT "array[0] is ", array[0];
+	//array[0] := array[0];
 	//a := array[0];
 	//array[0] := a;
 	
