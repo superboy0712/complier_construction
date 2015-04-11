@@ -6,22 +6,20 @@ VOID FUNC arrayTest() START
 	PRINT a, b;
 	INT ARRAY [10] Barray;
     INT ARRAY [10] Carray;
-	INT ARRAY [10] array;
-	array := NEW INT ARRAY[10];
-	//b := array;
-	PRINT a;
-	PRINT array; // failed. why.
-	//PRINT(NEW FLOAT ARRAY[3]);
-	PRINT "ZERO";
-	PRINT array[0];
-	PRINT "ONE";
-	PRINT array[1];
-	PRINT "TWO";
-	PRINT array[2];
-//	PRINT array[3];
-//	PRINT array[20];
-	//array[0] := 1;
-	//array[1] := b;
-	
-	//PRINT array[0], array[1];
+	INT ARRAY [24] array;
+	array := NEW INT ARRAY[24];
+//	b := array; type checking. 
+	PRINT a, b;
+	PRINT "array before new is ", array; // failed. why.
+	array := NEW INT ARRAY[24];
+	PRINT "array after new is ", array;
+	PRINT "array before new is ", array; // failed. why.
+	array := NEW INT ARRAY[24];
+	PRINT "array after new is ", array;
+	PRINT "array before new is ", array; // failed. why.
+	array := NEW INT ARRAY[24];
+	PRINT "array after new is ", array;
+	PRINT "array before new is ", array; // failed. why.
+	array := NEW INT ARRAY[24];
+	PRINT "array after new is ", array;
 END

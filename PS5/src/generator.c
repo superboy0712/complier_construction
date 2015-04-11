@@ -469,6 +469,7 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 		 *  lvalue is array_index_expression
 		 */
 		// get the lvalue's address
+		// WARNING, WOULD MAKE incomplete INDEX modifiable, destroy the array's weaving
 		instruction_add(POP, r2, NULL, 0, 0);
 		// assign to
 		instruction_add(STR, r3, r2, 0, 0);
