@@ -16,8 +16,8 @@ VOID FUNC arrayTest() START
 	PRINT array[0];
 	PRINT "ONE";
 	PRINT array[1];
-//	PRINT "TWO";
-//	PRINT array[2];
+	PRINT "TWO";
+	PRINT array[2];
 //	PRINT array[3];
 //	PRINT array[20];
 	//array[0] := 1;
