@@ -342,9 +342,9 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				/* calculate element's address = variable+4*x */
 				instruction_add(POP, r3, NULL, 0, 0);/* r3 <=var */
 				instruction_add(POP, r2, NULL, 0, 0);/* x */
-				instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
-				instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
-				//instruction_add3(LSL, r2, r2, STRDUP("#2"));/* or can use left shift */
+				//instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
+				//instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
+				instruction_add3(LSL, r2, r2, STRDUP("#2"));/* or can use left shift */
 				instruction_add3(ADD, r3, r3, r2);
 				instruction_add(PUSH, r3, NULL, 0, 0);
 				/**
@@ -442,17 +442,21 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 	assert(root->nodetype.index == assignment_statement_n.index);
 	gen_default(root, scopedepth);
 	/* acquire rvalue */
+	instruction_add(POP, r3, NULL, 0, 0);
 	if(root->children[1]->expression_type.index != array_index_e.index){
 		/**
 		 *  common rvalue
 		 */
-		instruction_add(POP, r3, NULL, 0, 0);
+
 	}else{
 		/**
 		 * rvalue is array_index_e
 		 */
-		instruction_add(POP, r2, NULL, 0, 0);
-		instruction_add(LDR, r3, r2, 0, 0); /* r3 <= [r2] */
+		/**
+		 *  assuming the stack
+		 *  sp -> lvalue|lvalue's address|...
+		 */
+		instruction_add3(ADD, sp, sp, STRDUP("#4")); /* POP THE VALUE-ADDR pair */
 	}
 	/* now rvalue is at r3 */
 
@@ -470,7 +474,12 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 		 */
 		// get the lvalue's address
 		// WARNING, WOULD MAKE incomplete INDEX modifiable, destroy the array's weaving
-		instruction_add(POP, r2, NULL, 0, 0);
+		/**
+		 *  assuming the stack
+		 *  sp -> lvalue|lvalue's address|...
+		 */
+		instruction_add(POP, r2, NULL, 0, 0);/* value representation */
+		instruction_add(POP, r2, NULL, 0, 0);/* expression's address */
 		// assign to
 		instruction_add(STR, r3, r2, 0, 0);
 	}
