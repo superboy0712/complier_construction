@@ -406,6 +406,10 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				instruction_add(LDR, r0, fp, 0, left->entry->stack_offset);
 				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
 
+				char a[20];
+				fprintf(a, "#%d", right->int_const);
+				instruction_add(MOV, r0, STRDUP(a), 0, 0);
+				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
 
 				instruction_add(LDR, r0, sp, 0, 0);
 				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
