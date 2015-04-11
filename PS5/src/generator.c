@@ -338,6 +338,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				 *
 				 *   var = address of Array's first level dimension's head
 				 */
+				//root->children[0]->data_type.base_type = INT_TYPE;/* make the address printable*/
 				/* calculate element's address = variable+4*x */
 				instruction_add(POP, r3, NULL, 0, 0);/* r3 <=var */
 				instruction_add(POP, r2, NULL, 0, 0);/* x */
@@ -554,7 +555,12 @@ void gen_PRINT_STATEMENT(node_t* root, int scopedepth) {
 			break;
 
 		default:
-			instruction_add(PUSH, STRDUP("$.INTEGER"), NULL, 0, 0);
+			//instruction_add(PUSH, STRDUP("$.INTEGER"), NULL, 0, 0);
+			instruction_add(STRING, STRDUP("\tmovw  r0, #:lower16:.INTEGER"),
+					NULL, 0, 0);
+			instruction_add(STRING, STRDUP("\tmovt  r0, #:upper16:.INTEGER"),
+					NULL, 0, 0);
+			instruction_add(POP, r1, NULL, 0, 0);
 			fprintf(stderr,
 					"WARNING: attempting to print something not int, float or bool\n");
 			break;
