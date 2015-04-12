@@ -321,9 +321,10 @@ void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
 		assert(root->children[0]->nodetype.index == variable_n.index);
 		gen_VARIABLE(root->children[0], 0);// generate var
 
-		if(root->children[1]->expression_type.index == ARRAY_INDEX_E){
+		if(root->children[1]->nodetype.index == expression_n.index){
 			/* nested index expressions cases*/
-			gen_ARRAY_INDEX_rvalue(root->children[1]);
+			//gen_ARRAY_INDEX_rvalue(root->children[1]);
+			gen_EXPRESSION(root->children[1], 0);
 		}else{
 			gen_SUB_tree(root->children[1], 0);// generate X
 		}

@@ -12,10 +12,15 @@ VOID FUNC arrayTest() START
 	array[1] :=1;
 	PRINT "array[1] is ", array[1];
 	INT bbbbbbbbbbbbbbbb;
+	PRINT "BEFORE";
 	bbbbbbbbbbbbbbbb := 1;
-	array[(array[bbbbbbbbbbbbbbbb])] := 2;
+	PRINT "bbbbbbbbbbbbbbbb is ", bbbbbbbbbbbbbbbb;
+	PRINT "array[bbbbbbbbbbbbbbbb] is ", array[bbbbbbbbbbbbbbbb];
 	PRINT "array[(array[bbbbbbbbbbbbbbbb])] is ", array[(array[bbbbbbbbbbbbbbbb])];
-	PRINT "array[(array[bbbbbbbbbbbbbbbb])] is ", array[1];
-	//PRINT "array[(array[20])] is ", array[(array[20])];
+	array[(array[bbbbbbbbbbbbbbbb])] := 2;
+	PRINT "AFTER array[(array[bbbbbbbbbbbbbbbb])] := 2;";
+	PRINT "bbbbbbbbbbbbbbbb is ", bbbbbbbbbbbbbbbb;
+	PRINT "array[bbbbbbbbbbbbbbbb] is ", array[bbbbbbbbbbbbbbbb];
+	PRINT "array[(array[bbbbbbbbbbbbbbbb])] is ", array[(array[bbbbbbbbbbbbbbbb])];
 END
 
