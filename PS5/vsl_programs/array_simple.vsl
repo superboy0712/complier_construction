@@ -1,15 +1,10 @@
 VOID FUNC arrayTest() START
-	debug_registers_print();
 	INT a;
 	INT b;
 	a := 66;
 	b := 44;
 	PRINT a, b;
-	INT ARRAY [24] Barray;
-    INT ARRAY [24] Carray;
 	INT ARRAY [24] array;
-	array := NEW INT ARRAY[24];
-//	b := array; type checking. 
 	PRINT a, b;
 	debug_registers_print();
 	PRINT "array before new is ", array; // failed. why.
@@ -23,11 +18,12 @@ VOID FUNC arrayTest() START
 	array := NEW INT ARRAY[24];
 	PRINT "array after new is ", array;
 	PRINT "array before new is ", array; // failed. why.
-	array := NEW INT ARRAY[24];
-	PRINT "array after new is ", array;
-	//PRINT "array[23] is ", array[23];
+	//array := NEW INT ARRAY[24];
+	//PRINT "array after new is ", array;
+	//PRINT "hello";
+	//PRINT "array[0] is ", array;
 	//array[0] := b;
-	a := array[0];
+	//a := array[0];
 	//array[0] := a;
 	
 END

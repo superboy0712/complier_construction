@@ -206,9 +206,9 @@ void gen_FUNCTION(node_t *root, int scopedepth) {
 		assert(root->n_children == 2);
 		gen_default(root->children[1], scopedepth);/*!< bypass parameter_list node, avoid stack redecalration*/
 		/* special code injection */
-		if(strcmp(root->function_entry->label, "debug_mem_print")){
-			gen_debug_mem_print();
-		}
+//		if(strcmp(root->function_entry->label, "debug_mem_print")){
+//			gen_debug_mem_print();
+//		}
 		/* remove stack frame, jump to retrun address */
 		instruction_add(MOV, sp, fp, 0, 0);
 		instruction_add(POP, fp, NULL, 0, 0);
@@ -294,7 +294,7 @@ void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
 		gen_ARRAY_INDEX_e_address_calculation(root->children[0]);
 		/* now r0 stores the address of var[X]/left child
 		 * stack top is value of var[X]/left child */
-		gen_default(root->children[1]);// generate Y
+		gen_default(root->children[1], 0);// generate Y
 		instruction_add(POP, r2, NULL, 0, 0); // r2 <= Y
 		instruction_add(POP, r3, NULL, 0, 0); // r3 <= var[X]
 		instruction_add3(LSL, r2, r2, STRDUP("#2"));// r2 < 4*r2
@@ -304,8 +304,8 @@ void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
 		instruction_add(PUSH, r3, NULL, 0, 0);/*!< PUSH the rvalue on top of stack */
 	}else{
 		assert(root->children[0]->nodetype.index == variable_n.index);
-		gen_VARIABLE(root->children[0]);// generate var
-		gen_default(root->children[1]);// generate X
+		gen_VARIABLE(root->children[0], 0);// generate var
+		gen_default(root->children[1], 0);// generate X
 		instruction_add(POP, r2, NULL, 0, 0); // r2 <= X
 		instruction_add(POP, r3, NULL, 0, 0); // r3 <= var
 		instruction_add3(LSL, r2, r2, STRDUP("#2"));// r2 < 4*r2
