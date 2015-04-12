@@ -300,12 +300,15 @@ void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
 		gen_ARRAY_INDEX_e_address_calculation(root->children[0]);
 		/* now r0 stores the address of var[X]/left child
 		 * stack top is value of var[X]/left child */
-		gen_default(root->children[1], 0);// generate Y
+		gen_SUB_tree(root->children[1], 0);// generate Y
 		instruction_add(POP, r2, NULL, 0, 0); // r2 <= Y
 		instruction_add(POP, r3, NULL, 0, 0); // r3 <= var[X]
+		instruction_add(POP, r0, NULL, 0, 0); // r0 <= address of var[X]
 		instruction_add3(LSL, r2, r2, STRDUP("#2"));// r2 < 4*r2
 		instruction_add3(ADD, r0, r3, r2);// r0 <= r3 + r2
 		/* now r0 stores the address of var[X][Y] */
+		/* try to protect r0 */
+		instruction_add(PUSH, r0, NULL, 0, 0);
 		instruction_add(LDR, r3, r0, 0, 0);
 		instruction_add(PUSH, r3, NULL, 0, 0);/*!< PUSH the rvalue on top of stack */
 	}else{
@@ -321,6 +324,8 @@ void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
 		instruction_add3(LSL, r2, r2, STRDUP("#2"));// r2 < 4*r2
 		instruction_add3(ADD, r0, r3, r2);// r0 <= r3 + r2
 		/* now r0 stores the address of var[X] */
+		/* try to protect r0 */
+		instruction_add(PUSH, r0, NULL, 0, 0);
 		instruction_add(LDR, r3, r0, 0, 0);
 		instruction_add(PUSH, r3, NULL, 0, 0);/*!< PUSH the rvalue on top of stack */
 	}
