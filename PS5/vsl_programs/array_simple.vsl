@@ -26,7 +26,7 @@ VOID FUNC arrayTest() START
 	array := NEW INT ARRAY[24];
 	PRINT "array after new is ", array;
 	//PRINT "array[23] is ", array[23];
-	//array[0] := array[0];
+	//array[0] := b;
 	a := array[0];
 	//array[0] := a;
 	

@@ -272,7 +272,50 @@ void gen_DECLARATION_STATEMENT(node_t *root, int scopedepth) {
 	tracePrint("Ending DECLARATION\n");
 	scopedepth--;
 }
+/**
+ * generation code for index_node address calculation
+ * @param root root if index_node tree
+ * @return the address/result will store @ r0
+ */
+void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
+	assert(root);
+	assert(root->expression_type.index == ARRAY_INDEX_E);
+	/**
+	 * var[X][Y][Z]
+	 *
+	 * idx-expr(Z)
+	 * 	\idx-expr(Y)
+	 * 	  \idx-expr(X)
+	 * 	    \variable(var)
+	 *
+	 * 	now expr := INT_CONST, NOT YET including arithmetic expressions
+	 */
+	if(root->children[0]->nodetype.index != variable_n.index){
+		gen_ARRAY_INDEX_e_address_calculation(root->children[0]);
+		/* now r0 stores the address of var[X]/left child
+		 * stack top is value of var[X]/left child */
+		gen_default(root->children[1]);// generate Y
+		instruction_add(POP, r2, NULL, 0, 0); // r2 <= Y
+		instruction_add(POP, r3, NULL, 0, 0); // r3 <= var[X]
+		instruction_add3(LSL, r2, r2, STRDUP("#2"));// r2 < 4*r2
+		instruction_add3(ADD, r0, r3, r2);// r0 <= r3 + r2
+		/* now r0 stores the address of var[X][Y] */
+		instruction_add(LDR, r3, r0, 0, 0);
+		instruction_add(PUSH, r3, NULL, 0, 0);/*!< PUSH the rvalue on top of stack */
+	}else{
+		assert(root->children[0]->nodetype.index == variable_n.index);
+		gen_VARIABLE(root->children[0]);// generate var
+		gen_default(root->children[1]);// generate X
+		instruction_add(POP, r2, NULL, 0, 0); // r2 <= X
+		instruction_add(POP, r3, NULL, 0, 0); // r3 <= var
+		instruction_add3(LSL, r2, r2, STRDUP("#2"));// r2 < 4*r2
+		instruction_add3(ADD, r0, r3, r2);// r0 <= r3 + r2
+		/* now r0 stores the address of var[X] */
+		instruction_add(LDR, r3, r0, 0, 0);
+		instruction_add(PUSH, r3, NULL, 0, 0);/*!< PUSH the rvalue on top of stack */
+	}
 
+}
 void gen_EXPRESSION(node_t *root, int scopedepth) {
 	tracePrint("Starting EXPRESSION of type %s\n",
 			(char*) root->expression_type.text);
@@ -370,7 +413,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				/* if left child is not a variable node, then recursively traverse into/down */
 				/* left child must be ARRAY_INDEX_E */
 				assert(root->children[0]->expression_type.index == ARRAY_INDEX_E);
-				gen_default(root->children[0], scopedepth);
+				gen_default(root, scopedepth);
 				/* calculate my address based upon my children */
 				/**
 				 *  sp-> var+4*x|y|z...
@@ -423,8 +466,8 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 //				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
 				/* calculate element's address = variable+4*x */
 				instruction_add(POP, r3, NULL, 0, 0);/* r3 <=var */
-//				instruction_add(MOV, r0, r3, 0, 0);
-//				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
+				instruction_add(MOV, r0, r3, 0, 0);
+				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
 
 				instruction_add(POP, r2, NULL, 0, 0);/* x */
 //				instruction_add(MOV, r0, r2, 0, 0);
@@ -457,8 +500,8 @@ void gen_VARIABLE(node_t *root, int scopedepth) {
 	assert(root);
 	assert(root->entry);
 
-	if(root->data_type.base_type != NO_TYPE){
-	/* bypass the array_index's variable node */
+//	if(root->data_type.base_type != NO_TYPE){
+//	/* bypass the array_index's variable node */
 		if(root->entry->stack_offset>0){
 			/* local variables or arguments */
 			tracePrint("\tI am an argument passing to a function!\n");
@@ -467,7 +510,7 @@ void gen_VARIABLE(node_t *root, int scopedepth) {
 		/* push the value on top of stack for possible assignement, as rhs value/constant ? */
 		/* or just for evaluating nesting arithmetic/logic expressions */
 		instruction_add(PUSH, r3, NULL, 0, 0);
-	}
+//	}
 	tracePrint("End VARIABLE %s, depth difference: %d, stack offset: %d\n",
 			root->label, 0, root->entry->stack_offset);
 	scopedepth--;
@@ -535,21 +578,21 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 	gen_default(root, scopedepth);
 	/* acquire rvalue */
 	instruction_add(POP, r3, NULL, 0, 0);
-	if(root->children[1]->expression_type.index != array_index_e.index){
+	//if(root->children[1]->expression_type.index != array_index_e.index){
 		/**
 		 *  common rvalue
 		 */
 
-	}else{
-		/**
-		 * rvalue is array_index_e
-		 */
-		/**
-		 *  assuming the stack
-		 *  sp -> lvalue|lvalue's address|...
-		 */
-		instruction_add3(ADD, sp, sp, STRDUP("#4")); /* POP THE VALUE-ADDR pair */
-	}
+//	}else{
+//		/**
+//		 * rvalue is array_index_e
+//		 */
+//		/**
+//		 *  assuming the stack
+//		 *  sp -> lvalue|lvalue's address|...
+//		 */
+//		instruction_add3(ADD, sp, sp, STRDUP("#4")); /* POP THE VALUE-ADDR pair */
+//	}
 	/* now rvalue is at r3 */
 
 	/* store rvalue in address of lhs*/
@@ -565,11 +608,19 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 		 *  lvalue is array_index_expression
 		 */
 		// get the lvalue's address
-		// WARNING, WOULD MAKE incomplete INDEX modifiable, destroy the array's weaving
+		//! TODO WARNING, WOULD MAKE incomplete INDEX modifiable, destroy the array's weaving
 		/**
 		 *  assuming the stack
 		 *  sp -> lvalue|lvalue's address|...
 		 */
+
+		/* calculate the address of array-index/element */
+		node_t *idx = root->children[0];
+		while(idx->children[0]->nodetype.index != variable_n.index){
+			idx = idx->children[0];
+		}
+		assert(idx->children[0]->nodetype.index == variable_n.index);
+
 		instruction_add(POP, r2, NULL, 0, 0);/* value representation */
 		instruction_add(POP, r2, NULL, 0, 0);/* expression's address */
 		// assign to
