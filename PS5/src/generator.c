@@ -281,9 +281,58 @@ void gen_DECLARATION_STATEMENT(node_t *root, int scopedepth) {
 /**
  * generation code for index_node address calculation
  * @param root root if index_node tree
- * @return the address/result will store @ r0
+ * @return the address/result will push on top of stack
  */
 void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
+	assert(root);
+	assert(root->expression_type.index == ARRAY_INDEX_E);
+	/**
+	 * var[X][Y][Z]
+	 *
+	 * idx-expr(Z)
+	 * 	\idx-expr(Y)
+	 * 	  \idx-expr(X)
+	 * 	    \variable(var)
+	 *
+	 * 	now expr := INT_CONST, NOT YET including arithmetic expressions
+	 */
+	if(root->children[0]->nodetype.index != variable_n.index){
+		gen_ARRAY_INDEX_e_address_calculation(root->children[0]);
+		/*
+		 * now r0 and stack top stores the address of var[X]/left child
+		 */
+		gen_SUB_tree(root->children[1], 0);// generate Y
+
+		instruction_add(POP, r2, NULL, 0, 0); // r2 <= Y
+		instruction_add(POP, r3, NULL, 0, 0); // r3 <= left idx's address
+		/* fetch left idx's value, which is still address of head of next dimension array*/
+		instruction_add(LDR, r3, r3, 0, 0);// r3 <= [r3]
+		instruction_add3(LSL, r2, r2, STRDUP("#2"));// r2 < 4*r2
+		instruction_add3(ADD, r0, r3, r2);// r0 <= r3 + r2
+		/* now r0 stores the address of var[X][Y] */
+		/* try to protect r0 */
+		instruction_add(PUSH, r0, NULL, 0, 0);
+	}else{
+		assert(root->children[0]->nodetype.index == variable_n.index);
+		gen_VARIABLE(root->children[0], 0);// generate var
+		gen_SUB_tree(root->children[1], 0);// generate X
+
+		instruction_add(POP, r2, NULL, 0, 0); // r2 <= X
+		instruction_add(POP, r3, NULL, 0, 0); // r3 <= var
+		instruction_add3(LSL, r2, r2, STRDUP("#2"));// r2 < 4*r2
+		instruction_add3(ADD, r0, r3, r2);// r0 <= r3 + r2
+		/* now r0 stores the address of var[X] */
+		/* try to protect r0 */
+		instruction_add(PUSH, r0, NULL, 0, 0);
+	}
+
+}
+/**
+ *
+ * @param root
+ * @return expression value will be put on top of stack
+ */
+void gen_ARRAY_INDEX_rvalue(node_t *root){
 	assert(root);
 	assert(root->expression_type.index == ARRAY_INDEX_E);
 	/**
