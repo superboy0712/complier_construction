@@ -300,7 +300,10 @@ void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
 		gen_ARRAY_INDEX_e_address_calculation(root->children[0]);
 		/* now r0 stores the address of var[X]/left child
 		 * stack top is value of var[X]/left child */
+		tracePrint("#####generate right child of index in middle#####\n");
 		gen_SUB_tree(root->children[1], 0);// generate Y
+		tracePrint("#####end right child of index in middle#####\n");
+
 		instruction_add(POP, r2, NULL, 0, 0); // r2 <= Y
 		instruction_add(POP, r3, NULL, 0, 0); // r3 <= var[X]
 		instruction_add(POP, r0, NULL, 0, 0); // r0 <= address of var[X]
@@ -319,6 +322,7 @@ void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
 		tracePrint("#####generate right child of index#####\n");
 		gen_SUB_tree(root->children[1], 0);// generate X
 		tracePrint("#####end right child of index#####\n");
+
 		instruction_add(POP, r2, NULL, 0, 0); // r2 <= X
 		instruction_add(POP, r3, NULL, 0, 0); // r3 <= var
 		instruction_add3(LSL, r2, r2, STRDUP("#2"));// r2 < 4*r2
@@ -546,8 +550,9 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 		/**
 		 *  now, r0 holds index's address
 		 */
-		/* now r3 was poluted !!!*/
+		/* now r3 was polluted !!!*/
 		/* acquire rvalue */
+		instruction_add(POP, r0, NULL, 0, 0); /*! address */
 		instruction_add(POP, r5, NULL, 0, 0); /*< lvalue */
 		instruction_add(POP, r5, NULL, 0, 0); /*! rvalue */
 		instruction_add(STR, r5, r0, 0, 0);
