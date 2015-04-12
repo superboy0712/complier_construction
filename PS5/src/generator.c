@@ -88,7 +88,7 @@ static void tracePrint(const char * string, ...) {
 
 	instruction_add(COMMMENT, STRDUP(buff2), NULL, 0, 0);
 }
-
+void gen_ARRAY_INDEX_rvalue(node_t *root);
 void gen_default(node_t *root, int scopedepth) {
 	/* Everything else can just continue through the tree */
 	if (root == NULL) {
@@ -301,7 +301,12 @@ void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
 		/*
 		 * now r0 and stack top stores the address of var[X]/left child
 		 */
-		gen_SUB_tree(root->children[1], 0);// generate Y
+		if(root->children[1]->expression_type.index == ARRAY_INDEX_E){
+			/* nested index expressions cases*/
+			gen_ARRAY_INDEX_rvalue(root->children[1]);
+		}else{
+			gen_SUB_tree(root->children[1], 0);// generate Y
+		}
 
 		instruction_add(POP, r2, NULL, 0, 0); // r2 <= Y
 		instruction_add(POP, r3, NULL, 0, 0); // r3 <= left idx's address
@@ -315,7 +320,13 @@ void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
 	}else{
 		assert(root->children[0]->nodetype.index == variable_n.index);
 		gen_VARIABLE(root->children[0], 0);// generate var
-		gen_SUB_tree(root->children[1], 0);// generate X
+
+		if(root->children[1]->expression_type.index == ARRAY_INDEX_E){
+			/* nested index expressions cases*/
+			gen_ARRAY_INDEX_rvalue(root->children[1]);
+		}else{
+			gen_SUB_tree(root->children[1], 0);// generate X
+		}
 
 		instruction_add(POP, r2, NULL, 0, 0); // r2 <= X
 		instruction_add(POP, r3, NULL, 0, 0); // r3 <= var
