@@ -25,9 +25,9 @@ VOID FUNC arrayTest() START
 	PRINT "b is ", b;
 	array[20] := b;
 	PRINT "array[20] is ", array[20];
-	//a := array[20];
-	//PRINT "a is ", a;
-	//array[0] := a;
+	a := array[20];
+	PRINT "a is ", a;
+	array[0] := a;
 	
 END
 
