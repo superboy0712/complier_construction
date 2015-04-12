@@ -27,8 +27,22 @@ VOID FUNC arrayTest() START
 	PRINT "array[20] is ", array[20];
 	a := array[20];
 	PRINT "a is ", a;
+	a := 20;
 	array[0] := a;
-	
+	array[0] := 987654;
+	array[1] := array[0];
+	PRINT "array[1] is ", array[1];
+	array[1] := array[a];
+	PRINT "array[1] is ", array[1];
+	array[a] := 1;
+	PRINT "array[a] is ", array[a];
+	array[1] := 1;
+	INT bbbbbbbbbbbbbbbb;
+	bbbbbbbbbbbbbbbb := 1;
+	array[(array[bbbbbbbbbbbbbbbb])] := 1;
+	PRINT "array[1] is ", array[1];
+	array[20] := 1;
+	PRINT "array[(array[20])] is ", array[(array[20])];
 END
 
 VOID FUNC debug_registers_print() START

@@ -310,8 +310,12 @@ void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
 		instruction_add(PUSH, r3, NULL, 0, 0);/*!< PUSH the rvalue on top of stack */
 	}else{
 		assert(root->children[0]->nodetype.index == variable_n.index);
+		tracePrint("#####generate left child of index#####\n");
 		gen_VARIABLE(root->children[0], 0);// generate var
+		tracePrint("#####end left child of index#####\n");
+		tracePrint("#####generate right child of index#####\n");
 		gen_SUB_tree(root->children[1], 0);// generate X
+		tracePrint("#####end right child of index#####\n");
 		instruction_add(POP, r2, NULL, 0, 0); // r2 <= X
 		instruction_add(POP, r3, NULL, 0, 0); // r3 <= var
 		instruction_add3(LSL, r2, r2, STRDUP("#2"));// r2 < 4*r2
@@ -512,7 +516,9 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 	assert(root->n_children == 2);
 	assert(root->nodetype.index == assignment_statement_n.index);
 	//gen_default(root, scopedepth); // push rvalue
+	tracePrint("#####  right child of assign#####\n");
 	gen_SUB_tree(root->children[1], scopedepth);
+	tracePrint("#####  end right child of assign#####\n");
 
 
 	/* store rvalue in address of lhs*/
@@ -529,8 +535,9 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 		 *  lvalue is array_index_expression
 		 */
 		//! TODO WARNING, WOULD MAKE incomplete INDEX modifiable, destroy the array's weaving
-
+		tracePrint("#####  left child gen of index in assign#####\n");
 		gen_ARRAY_INDEX_e_address_calculation(root->children[0]);
+		tracePrint("##### END left child gen of index in assign#####\n");
 		/**
 		 *  now, r0 holds index's address
 		 */
