@@ -511,7 +511,8 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 	assert(root);
 	assert(root->n_children == 2);
 	assert(root->nodetype.index == assignment_statement_n.index);
-	gen_default(root, scopedepth); // push rvalue
+	//gen_default(root, scopedepth); // push rvalue
+	gen_SUB_tree(root->children[1]);
 	/* acquire rvalue */
 	instruction_add(POP, r3, NULL, 0, 0);
 	/* now rvalue is at r3 */
@@ -534,10 +535,9 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 		 *  now, r0 holds index's address
 		 */
 		instruction_add(STR, r3, r0, 0, 0);
+		/* recover  stack */
 		instruction_add(POP, r3, NULL, 0, 0);
 	}
-	/* recover stack */
-	instruction_add(POP, r3, NULL, 0, 0);
 	tracePrint("End ASSIGNMENT_STATEMENT\n");
 }
 
