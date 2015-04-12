@@ -409,80 +409,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 			/** TODO why not flatten/simplify array_index_expression? */
 			assert(root->n_children==2);
 			assert(root->children[0]);
-			if(root->children[0]->nodetype.index != variable_n.index){
-				/* if left child is not a variable node, then recursively traverse into/down */
-				/* left child must be ARRAY_INDEX_E */
-				assert(root->children[0]->expression_type.index == ARRAY_INDEX_E);
-				gen_default(root, scopedepth);
-				/* calculate my address based upon my children */
-				/**
-				 *  sp-> var+4*x|y|z...
-				 */
-				/* aquire the address of var[x][y] */
-//				instruction_add(POP, r0, NULL, 0, 0);/* r0 <= var+4*x */
-//				instruction_add(POP, r2, NULL, 0, 0);/* r2 <= y */
-//				instruction_add(LDR, r3, r0, 0, 0); /* r3 <= [r0] */
-//				instruction_add(MOV, r1, STRDUP("#4"), 0, 0);
-//				instruction_add3(MUL, r2, r2, r1); /* r2 <= r2 * 4 */
-//				instruction_add3(LSL, r2, r2, STRDUP("#2"));/* r2 <= 4*y, or can use left shift */
-//				instruction_add3(ADD, r3, r3, r2);/* r3 <= [[var]+4*x]+4*y */
-//				instruction_add(PUSH, r3, NULL, 0, 0);
-				/**
-				 *  sp-> [var+4*x]+4*y|z...
-				 */
-			}else{
-				/* left child is variable, the innermost one */
-				/* but in the assign function which already applied the gen_VARIABLE */
-				/**
-				 * the stack layout for var[x][y][z] should be like
-				 *  idx-expr(z)
-				 *    \idx-expr(y)
-				 *      \idx-expr(x)
-				 *        \variable(var)
-				 *
-				 *   sp-> var|x|y|z...
-				 *
-				 *   var = address of Array's first level dimension's head
-				 */
-//				node_t *left = root->children[0];
-//				node_t *right = root->children[1];
-//				instruction_add(LDR, r0, fp, 0, left->entry->stack_offset);
-//				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
-//
-//				char a[20];
-//				sprintf(a, "#%d", right->int_const);
-//				instruction_add(MOV, r0, STRDUP(a), 0, 0);
-//				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
-
-//				sprintf(a, "#%d", left->entry->stack_offset);
-//				instruction_add(MOV, r0, STRDUP(a), 0, 0);
-//				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
-
-
-//				instruction_add(LDR, r0, sp, 0, 4);
-//				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
-//
-//				instruction_add(LDR, r0, sp, 0, 8);
-//				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
-				/* calculate element's address = variable+4*x */
-				instruction_add(POP, r3, NULL, 0, 0);/* r3 <=var */
-				instruction_add(MOV, r0, r3, 0, 0);
-				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
-
-				instruction_add(POP, r2, NULL, 0, 0);/* x */
-//				instruction_add(MOV, r0, r2, 0, 0);
-//				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
-
-				instruction_add3(LSL, r2, r2, STRDUP("#2"));
-				instruction_add3(ADD, r3, r3, r2);
-				instruction_add(PUSH, r3, NULL, 0, 0);
-				/**
-				 *  sp-> var+4*x|y|z...
-				 */
-//				instruction_add(MOV, r0, r2, 0, 0);
-//				instruction_add(BL, STRDUP("debugprint_r0"), NULL, 0, 0);
-
-			}
+			gen_ARRAY_INDEX_e_address_calculation(root);
 		}
 		break;
 		default:
@@ -578,21 +505,6 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 	gen_default(root, scopedepth);
 	/* acquire rvalue */
 	instruction_add(POP, r3, NULL, 0, 0);
-	//if(root->children[1]->expression_type.index != array_index_e.index){
-		/**
-		 *  common rvalue
-		 */
-
-//	}else{
-//		/**
-//		 * rvalue is array_index_e
-//		 */
-//		/**
-//		 *  assuming the stack
-//		 *  sp -> lvalue|lvalue's address|...
-//		 */
-//		instruction_add3(ADD, sp, sp, STRDUP("#4")); /* POP THE VALUE-ADDR pair */
-//	}
 	/* now rvalue is at r3 */
 
 	/* store rvalue in address of lhs*/
@@ -607,24 +519,11 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 		/**
 		 *  lvalue is array_index_expression
 		 */
-		// get the lvalue's address
 		//! TODO WARNING, WOULD MAKE incomplete INDEX modifiable, destroy the array's weaving
 		/**
-		 *  assuming the stack
-		 *  sp -> lvalue|lvalue's address|...
+		 *  now, r0 holds index's address
 		 */
-
-		/* calculate the address of array-index/element */
-		node_t *idx = root->children[0];
-		while(idx->children[0]->nodetype.index != variable_n.index){
-			idx = idx->children[0];
-		}
-		assert(idx->children[0]->nodetype.index == variable_n.index);
-
-		instruction_add(POP, r2, NULL, 0, 0);/* value representation */
-		instruction_add(POP, r2, NULL, 0, 0);/* expression's address */
-		// assign to
-		instruction_add(STR, r3, r2, 0, 0);
+		instruction_add(STR, r3, r0, 0, 0);
 	}
 
 	tracePrint("End ASSIGNMENT_STATEMENT\n");
