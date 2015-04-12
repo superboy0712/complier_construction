@@ -2,41 +2,25 @@ VOID FUNC arrayTest() START
 	INT a;
 	INT b;
 	
-	PRINT "a, b before init ", a, b;
-	a := 66;
-	b := 123123;
+	a := 111111;
+	b := 222222;
 	PRINT "a, b after init ", a, b;
 	INT ARRAY [24] array;
-	PRINT a, b;
 	PRINT "array before new is ", array; // failed. why.
 	array := NEW INT ARRAY[24];
 	PRINT "array after new is ", array;
-	PRINT "array before new is ", array; // failed. why.
-	array := NEW INT ARRAY[24];
-	PRINT "array after new is ", array;
-
-	PRINT "array before new is ", array; // failed. why.
-	array := NEW INT ARRAY[24];
-	PRINT "array after new is ", array;
-
-	PRINT "array before new is ", array; // failed. why.
-	array := NEW INT ARRAY[24];
-	PRINT "array after new is ", array;
-	PRINT "b is ", b;
-	array[20] := b;
-	PRINT "array[20] is ", array[20];
-	a := array[20];
-	PRINT "a is ", a;
-	array[0] := a;
-	
-END
-
-VOID FUNC debug_registers_print() START
-	INT a;// dummy statement, just for injecting my code
-END
-
-VOID FUNC debug_mem_print( INT address) START
-	PRINT "debug_mem_print( ", address, ")";
-	address := address;// for passing argument
+	array[1] :=1;
+	PRINT "array[1] is ", array[1];
+	INT bbbbbbbbbbbbbbbb;
+	PRINT "BEFORE";
+	bbbbbbbbbbbbbbbb := 1;
+	PRINT "bbbbbbbbbbbbbbbb is ", bbbbbbbbbbbbbbbb;
+	PRINT "array[bbbbbbbbbbbbbbbb] is ", array[bbbbbbbbbbbbbbbb];
+	PRINT "array[(array[bbbbbbbbbbbbbbbb])] is ", array[(array[bbbbbbbbbbbbbbbb])];
+	array[(array[bbbbbbbbbbbbbbbb])] := 2;
+	PRINT "AFTER array[(array[bbbbbbbbbbbbbbbb])] := 2;";
+	PRINT "bbbbbbbbbbbbbbbb is ", bbbbbbbbbbbbbbbb;
+	PRINT "array[bbbbbbbbbbbbbbbb] is ", array[bbbbbbbbbbbbbbbb];
+	PRINT "array[(array[bbbbbbbbbbbbbbbb])] is ", array[(array[bbbbbbbbbbbbbbbb])];
 END
 
