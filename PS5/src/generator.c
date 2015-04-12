@@ -99,7 +99,13 @@ void gen_default(node_t *root, int scopedepth) {
 		if (root->children[i] != NULL)
 			root->children[i]->generate(root->children[i], scopedepth);
 }
-
+void gen_SUB_tree(node_t *root, int scopedepth){
+	if (root == NULL) {
+			return;
+	}
+	gen_default(root, scopedepth);
+	root->generate(root, scopedepth);
+}
 void gen_PROGRAM(node_t *root, int scopedepth) {
 	/* Output the data segment */
 	if (outputStage == 12)
@@ -237,7 +243,7 @@ void gen_ARRAY(int nDimensions, int* dimensions) {
 
 	/** allocate from outtermost dimension, pre-allocation, post-assignment */
 	/* caller saves registers on stack */
-	instruction_add(STRING, STRDUP("\tpush\t{r4-r11}"), NULL, 0, 0);
+	instruction_add(STRING, STRDUP("\tpush\t{r1-r11}"), NULL, 0, 0);
 	/* caller pushes parameters on stack */
 	char const2str[50] = {0};
 	sprintf(const2str, "#%d", (dimensions[0])*4);
@@ -248,7 +254,7 @@ void gen_ARRAY(int nDimensions, int* dimensions) {
 	/* caller removes parameters, restores registers */
 	sprintf(const2str, "#%d", 4);
 	instruction_add3(ADD, sp, sp, STRDUP(const2str));
-	instruction_add(STRING, STRDUP("\tpop\t{r4-r11}"), NULL, 0, 0);
+	instruction_add(STRING, STRDUP("\tpop\t{r1-r11}"), NULL, 0, 0);
 	/* use results, push the value/ptr on top of stack, assuming return value on r0 */
 	instruction_add(PUSH, r0, NULL, 0, 0);
 
@@ -305,7 +311,7 @@ void gen_ARRAY_INDEX_e_address_calculation(node_t *root){
 	}else{
 		assert(root->children[0]->nodetype.index == variable_n.index);
 		gen_VARIABLE(root->children[0], 0);// generate var
-		gen_default(root->children[1], 0);// generate X
+		gen_SUB_tree(root->children[1], 0);// generate X
 		instruction_add(POP, r2, NULL, 0, 0); // r2 <= X
 		instruction_add(POP, r3, NULL, 0, 0); // r3 <= var
 		instruction_add3(LSL, r2, r2, STRDUP("#2"));// r2 < 4*r2
@@ -344,7 +350,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 			}
 
 			/* caller saves registers on stack */
-			instruction_add(STRING, STRDUP("\tpush \t{r4-r11}"), NULL, 0, 0);
+			instruction_add(STRING, STRDUP("\tpush \t{r1-r11}"), NULL, 0, 0);
 			/* caller pushes parameters on stack */
 			gen_default(arg_list, scopedepth); /* generate arg_list's code */
 				/* in gen_variable/constant already push on top of stack !!!!!*/
@@ -364,7 +370,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				sprintf(const2str, "#%d", 4*(arg_list->n_children));
 				instruction_add3(ADD, sp, sp, STRDUP(const2str));
 			}
-			instruction_add(STRING, STRDUP("\tpop \t{r4-r11}"), NULL, 0, 0);
+			instruction_add(STRING, STRDUP("\tpop \t{r1-r11}"), NULL, 0, 0);
 			/* use results, push the value on top of stack, assuming return value on r0 */
 			instruction_add(PUSH, r0, NULL, 0, 0);
 		}
@@ -425,10 +431,9 @@ void gen_VARIABLE(node_t *root, int scopedepth) {
 	scopedepth++;
 	tracePrint("Starting VARIABLE\n");
 	assert(root);
-	assert(root->entry);
 
-//	if(root->data_type.base_type != NO_TYPE){
-//	/* bypass the array_index's variable node */
+	if(root->entry){
+	/* bypass the function variable node */
 		if(root->entry->stack_offset>0){
 			/* local variables or arguments */
 			tracePrint("\tI am an argument passing to a function!\n");
@@ -437,9 +442,13 @@ void gen_VARIABLE(node_t *root, int scopedepth) {
 		/* push the value on top of stack for possible assignement, as rhs value/constant ? */
 		/* or just for evaluating nesting arithmetic/logic expressions */
 		instruction_add(PUSH, r3, NULL, 0, 0);
-//	}
-	tracePrint("End VARIABLE %s, depth difference: %d, stack offset: %d\n",
+
+		tracePrint("End VARIABLE %s, depth difference: %d, stack offset: %d\n",
 			root->label, 0, root->entry->stack_offset);
+	} else {
+		tracePrint("End VARIABLE %s, depth difference: %d",
+					root->label, 0);
+	}
 	scopedepth--;
 }
 typedef union ufloat {
@@ -502,7 +511,7 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 	assert(root);
 	assert(root->n_children == 2);
 	assert(root->nodetype.index == assignment_statement_n.index);
-	gen_default(root, scopedepth);
+	gen_default(root, scopedepth); // push rvalue
 	/* acquire rvalue */
 	instruction_add(POP, r3, NULL, 0, 0);
 	/* now rvalue is at r3 */
@@ -513,19 +522,22 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 		assert(root->children[0]->entry);
 		/* STORE to lvalue's address */
 		instruction_add(STR, r3, fp, 0, root->children[0]->entry->stack_offset);
-		/* restore stack, also pop lvalue(garbage) */
-		instruction_add3(ADD, sp, sp, "#4");
+
 	}else{
 		/**
 		 *  lvalue is array_index_expression
 		 */
 		//! TODO WARNING, WOULD MAKE incomplete INDEX modifiable, destroy the array's weaving
+
+		gen_ARRAY_INDEX_e_address_calculation(root->children[0]);
 		/**
 		 *  now, r0 holds index's address
 		 */
 		instruction_add(STR, r3, r0, 0, 0);
+		instruction_add(POP, r3, NULL, 0, 0);
 	}
-
+	/* recover stack */
+	instruction_add(POP, r3, NULL, 0, 0);
 	tracePrint("End ASSIGNMENT_STATEMENT\n");
 }
 

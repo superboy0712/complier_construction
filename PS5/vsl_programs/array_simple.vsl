@@ -1,28 +1,29 @@
 VOID FUNC arrayTest() START
 	INT a;
 	INT b;
+	
+	PRINT "a, b before init ", a, b;
 	a := 66;
-	b := 44;
-	PRINT a, b;
+	b := 123123;
+	PRINT "a, b after init ", a, b;
 	INT ARRAY [24] array;
 	PRINT a, b;
-	debug_registers_print();
-	PRINT "array before new is ", array; // failed. why.
-	array := NEW INT ARRAY[24];
-	debug_registers_print();
-	PRINT "array after new is ", array;
 	PRINT "array before new is ", array; // failed. why.
 	array := NEW INT ARRAY[24];
 	PRINT "array after new is ", array;
 	PRINT "array before new is ", array; // failed. why.
 	array := NEW INT ARRAY[24];
 	PRINT "array after new is ", array;
+
 	PRINT "array before new is ", array; // failed. why.
-	//array := NEW INT ARRAY[24];
-	//PRINT "array after new is ", array;
-	//PRINT "hello";
-	//PRINT "array[0] is ", array;
+	array := NEW INT ARRAY[24];
+	PRINT "array after new is ", array;
+
+	PRINT "array before new is ", array; // failed. why.
+	array := NEW INT ARRAY[24];
+	PRINT "array after new is ", array;
 	//array[0] := b;
+	PRINT "array[0] is ", array[0];
 	//a := array[0];
 	//array[0] := a;
 	
