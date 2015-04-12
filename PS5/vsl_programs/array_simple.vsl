@@ -22,10 +22,11 @@ VOID FUNC arrayTest() START
 	PRINT "array before new is ", array; // failed. why.
 	array := NEW INT ARRAY[24];
 	PRINT "array after new is ", array;
-	//array[0] := b;
-	PRINT "array[0] is ", array[0];
-	a := array[0];
-	PRINT "a is ", a;
+	PRINT "b is ", b;
+	array[20] := b;
+	PRINT "array[20] is ", array[20];
+	//a := array[20];
+	//PRINT "a is ", a;
 	//array[0] := a;
 	
 END

@@ -512,9 +512,9 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 	assert(root->n_children == 2);
 	assert(root->nodetype.index == assignment_statement_n.index);
 	//gen_default(root, scopedepth); // push rvalue
-	gen_SUB_tree(root->children[1]);
+	gen_SUB_tree(root->children[1], scopedepth);
 	/* acquire rvalue */
-	instruction_add(POP, r3, NULL, 0, 0);
+	instruction_add(POP, r5, NULL, 0, 0);
 	/* now rvalue is at r3 */
 
 	/* store rvalue in address of lhs*/
@@ -522,7 +522,7 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 		/** common lvalue expression */
 		assert(root->children[0]->entry);
 		/* STORE to lvalue's address */
-		instruction_add(STR, r3, fp, 0, root->children[0]->entry->stack_offset);
+		instruction_add(STR, r5, fp, 0, root->children[0]->entry->stack_offset);
 
 	}else{
 		/**
@@ -534,7 +534,8 @@ void gen_ASSIGNMENT_STATEMENT(node_t *root, int scopedepth) {
 		/**
 		 *  now, r0 holds index's address
 		 */
-		instruction_add(STR, r3, r0, 0, 0);
+		/* now r3 was poluted !!!*/
+		instruction_add(STR, r5, r0, 0, 0);
 		/* recover  stack */
 		instruction_add(POP, r3, NULL, 0, 0);
 	}
