@@ -399,27 +399,40 @@ void gen_bool_expression(node_t* root, int scopedepth)
 		/*unary expressions */
 		gen_node(root->children[0], scopedepth);
 		instruction_add(POP, r3, NULL, 0, 0); // r3 <= expr
-		instruction_add(MOV, r0, STRDUP("#0"), 0, 0);
-		instruction_add(CMP, r3, r0, 0, 0);
-		instruction_add(MOVNE, r0, STRDUP("#1"), 0, 0);
-		instruction_add(PUSH, r0, NULL, 0, 0); // stack <= -expr
+		instruction_add(MOV, r5, STRDUP("#0"), 0, 0);
+		instruction_add(MOV, r2, STRDUP("#0"), 0, 0);
+		instruction_add(CMP, r3, r5, 0, 0);
+		instruction_add(MOVEQ, r2, STRDUP("#1"), 0, 0);
+		instruction_add(PUSH, r2, NULL, 0, 0); // stack <= -expr
 		return;
 	}
-
+	/*binary expressions */
+	gen_node(root->children[0], scopedepth);
+	gen_node(root->children[1], scopedepth);
+	instruction_add(POP, r3, NULL, 0, 0); // r3 <= rhs
+	instruction_add(POP, r2, NULL, 0, 0); // r2 <= lhs
+	instruction_add(MOV, r0, STRDUP("#0"), 0, 0); // CLEAR r0
 	switch(root->expression_type.index){
         case OR_E:
-        	//instruction_add(STRING, STRDUP("\tOR "))
+        	instruction_add(STRING, STRDUP("\tORR \tr0, r2, r3"), NULL, 0, 0);
             break;
         
         case AND_E:
+        	instruction_add(STRING, STRDUP("\tAND \tr0, r2, r3"), NULL, 0, 0);
             break;
             
         case EQUAL_E:
+        	instruction_add(CMP, r2, r3, 0, 0);
+        	instruction_add(MOVEQ, r0, STRDUP("#1"), 0, 0);
             break;
             
         case NEQUAL_E:
+        	instruction_add(CMP, r2, r3, 0, 0);
+			instruction_add(MOVNE, r0, STRDUP("#1"), 0, 0);
             break;
     }
+	// post handling
+	instruction_add(PUSH, r0, NULL, 0, 0); // stack <= expr
 }
 
 

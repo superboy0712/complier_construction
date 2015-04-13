@@ -30,4 +30,16 @@ START
 	b := 1;
 	PRINT ---(1+(--(a+-a)));
 	PRINT -(-a--(-b*a--a));
+	BOOL c;
+	c := 1;
+	//c := !b;
+	PRINT c;
+	//c := !c;
+	PRINT FALSE, TRUE;
+	PRINT !FALSE, !TRUE;
+	PRINT !FALSE, !TRUE;
+	PRINT FALSE||TRUE;
+	PRINT FALSE||FALSE;
+	PRINT FALSE&&TRUE;
+	PRINT 2 == 1;
 END
