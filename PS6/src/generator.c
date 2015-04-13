@@ -395,7 +395,18 @@ void gen_float_expression(node_t* root, int scopedepth)
 
 void gen_bool_expression(node_t* root, int scopedepth)
 {
-    switch(root->expression_type.index){
+	if(root->expression_type.index == NOT_E){
+		/*unary expressions */
+		gen_node(root->children[0], scopedepth);
+		instruction_add(POP, r3, NULL, 0, 0); // r3 <= expr
+		instruction_add(MOV, r0, STRDUP("#0"), 0, 0);
+		instruction_add(CMP, r3, r0, 0, 0);
+		instruction_add(MOVNE, r0, STRDUP("#1"), 0, 0);
+		instruction_add(PUSH, r0, NULL, 0, 0); // stack <= -expr
+		return;
+	}
+
+	switch(root->expression_type.index){
         case OR_E:
         	//instruction_add(STRING, STRDUP("\tOR "))
             break;
@@ -408,10 +419,6 @@ void gen_bool_expression(node_t* root, int scopedepth)
             
         case NEQUAL_E:
             break;
-            
-        case NOT_E:
-            break;
-            
     }
 }
 
