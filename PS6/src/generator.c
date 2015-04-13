@@ -103,6 +103,11 @@ void gen_node( node_t *root, int scopedepth){
 }
 void gen_sub_tree ( node_t *root, int scopedepth)
 {
+	/**
+	 *  should used when its generate doesn't
+	 *  involve gen_default,
+	 *  otherwise will dupilicate side effects on stack
+	 */
     if(root == NULL){
         return;
     }
@@ -306,7 +311,7 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
     tracePrint ( "Ending EXPRESSION of type %s\n", (char*) root->expression_type.text);
 }
 /* gen_node already traverse node's children, and maintain its stack
- * no need to use gen_sub_tree, which would push every stuff on stack */
+ * no need to use gen_sub_tree which would generate twice of the whole, which would push every stuff on stack */
 void gen_int_expression(node_t* root, int scopedepth)
 {
 	//gen_default(root, scopedepth);
