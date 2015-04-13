@@ -270,16 +270,17 @@ void gen_ARRAY(int nDimensions, int* dimensions) {
     	assert(false);
     }
     /* nDimensions > 1*/
-    instruction_add(POP, r2, NULL, 0, 0);  /* r2 <= preivious dimension array head */
-    instruction_add(MOV, r3, STRDUP("#4"), 0, 0); /* for increase index offset */
+    //instruction_add(POP, r2, NULL, 0, 0);  /* r2 <= preivious dimension array head */
     for (int i = 0; i < dimensions[0]; ++i) {
+    	//instruction_add(STRING, STRDUP("\tpush\t{r1-r11}"), NULL, 0, 0);
     	gen_ARRAY(nDimensions-1, dimensions+1);
+    	//instruction_add(STRING, STRDUP("\tpop\t{r1-r11}"), NULL, 0, 0);
 		/* assign the newly allocated to proper position */
 		instruction_add(POP, r0, NULL, 0, 0); /* r0 <= new allocate */
-		instruction_add(STR, r0, r2, 0, 0); /* [r2] <= r0 */
-		instruction_add3(ADD, r2, r2, r3);
+		instruction_add(POP, r2, NULL, 0, 0);  /* r2 <= preivious dimension array head */
+		instruction_add(STR, r0, r2, 0, 4*i); /* [r2] <= r0 */
+		instruction_add(PUSH, r2, NULL, 0, 0); /* put my address on top of stack */
 	}
-	instruction_add(PUSH, r2, NULL, 0, 0); /* put my address on top of stack */
 }
 void gen_DECLARATION_STATEMENT(node_t *root, int scopedepth) {
 	scopedepth++;
