@@ -95,6 +95,12 @@ void gen_default ( node_t *root, int scopedepth)
         if( root->children[i] != NULL )
             root->children[i]->generate ( root->children[i], scopedepth );
 }
+void gen_node( node_t *root, int scopedepth){
+	if(root == NULL){
+		return;
+	}
+	root->generate(root, scopedepth);
+}
 void gen_sub_tree ( node_t *root, int scopedepth)
 {
     if(root == NULL){
@@ -299,13 +305,14 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
     
     tracePrint ( "Ending EXPRESSION of type %s\n", (char*) root->expression_type.text);
 }
-
+/* gen_node already traverse node's children, and maintain its stack
+ * no need to use gen_sub_tree, which would push every stuff on stack */
 void gen_int_expression(node_t* root, int scopedepth)
 {
-	gen_default(root, scopedepth);
+	//gen_default(root, scopedepth);
 	if(root->expression_type.index == UMINUS_E){
 		/*unary expressions */
-    	//gen_sub_tree(root->children[0], scopedepth);
+    	gen_node(root->children[0], scopedepth);
     	instruction_add(POP, r3, NULL, 0, 0); // r3 <= expr
     	instruction_add(NEG, r3, r3, 0, 0);
     	instruction_add(PUSH, r3, NULL, 0, 0); // stack <= -expr
@@ -313,8 +320,12 @@ void gen_int_expression(node_t* root, int scopedepth)
 	}
 	assert(root->n_children == 2);
 	/*binary expressions */
+	gen_node(root->children[0], scopedepth);
+	gen_node(root->children[1], scopedepth);
 	instruction_add(POP, r3, NULL, 0, 0); // r3 <= rhs
 	instruction_add(POP, r2, NULL, 0, 0); // r2 <= lhs
+	instruction_add(MOV, r0, STRDUP("#0"), 0, 0); // CLEAR r0
+	//instruction_add(CMP, r2, r3, 0, 0);
 	switch(root->expression_type.index){
 
         case ADD_E:
@@ -334,21 +345,33 @@ void gen_int_expression(node_t* root, int scopedepth)
             break;
             
         case LESS_E:
+        	instruction_add(CMP, r2, r3, 0, 0);
+        	instruction_add(MOVLT, r0, STRDUP("#1"), 0, 0);
             break;
             
         case GREATER_E:
+        	instruction_add(CMP, r2, r3, 0, 0);
+        	instruction_add(MOVGT, r0, STRDUP("#1"), 0, 0);
             break;
             
         case GEQUAL_E:
+        	instruction_add(CMP, r2, r3, 0, 0);
+        	instruction_add(MOVGE, r0, STRDUP("#1"), 0, 0);
             break;
             
         case LEQUAL_E:
+        	instruction_add(CMP, r2, r3, 0, 0);
+        	instruction_add(MOVLE, r0, STRDUP("#1"), 0, 0);
             break;
             
         case EQUAL_E:
+        	instruction_add(CMP, r2, r3, 0, 0);
+        	instruction_add(MOVEQ, r0, STRDUP("#1"), 0, 0);
             break;
             
         case NEQUAL_E:
+        	instruction_add(CMP, r2, r3, 0, 0);
+        	instruction_add(MOVNE, r0, STRDUP("#1"), 0, 0);
             break;
 
         default:
@@ -369,6 +392,7 @@ void gen_bool_expression(node_t* root, int scopedepth)
 {
     switch(root->expression_type.index){
         case OR_E:
+        	//instruction_add(STRING, STRDUP("\tOR "))
             break;
         
         case AND_E:

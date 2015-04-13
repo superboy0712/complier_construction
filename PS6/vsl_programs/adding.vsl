@@ -14,5 +14,20 @@ START
 	PRINT - (-b);
 	PRINT - (-b) + a;
 	c := a - (-b);
-	PRINT c;
+	PRINT 12 < 13;
+	PRINT 12 > 13;
+	PRINT 12 != 13;
+	PRINT 12 == 13;
+	PRINT (-(-(-3)));
+	PRINT ---(1+(--a));
+
+	INT ARRAY[3][3] array;
+	array := NEW INT ARRAY[3][3];
+	array[2][2] :=1213;
+	array[0][0] :=1;
+	PRINT array[2][2];
+	a := -2;
+	b := 1;
+	PRINT ---(1+(--(a+-a)));
+	PRINT -(-a--(-b*a--a));
 END
