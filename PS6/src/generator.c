@@ -1,5 +1,6 @@
 #include "generator.h"
 #include "optimizer.h"
+#include <assert.h>
 extern int outputStage; // This variable is located in vslc.c
 
 int peephole = 1;
@@ -94,7 +95,15 @@ void gen_default ( node_t *root, int scopedepth)
         if( root->children[i] != NULL )
             root->children[i]->generate ( root->children[i], scopedepth );
 }
+void gen_sub_tree ( node_t *root, int scopedepth)
+{
+    if(root == NULL){
+        return;
+    }
 
+    gen_default(root, scopedepth);
+    root->generate(root, scopedepth);
+}
 
 void gen_PROGRAM ( node_t *root, int scopedepth)
 {
@@ -293,20 +302,35 @@ void gen_EXPRESSION ( node_t *root, int scopedepth )
 
 void gen_int_expression(node_t* root, int scopedepth)
 {
-    switch(root->expression_type.index){
-        case UMINUS_E:
-            break;
-            
+	gen_default(root, scopedepth);
+	if(root->expression_type.index == UMINUS_E){
+		/*unary expressions */
+    	//gen_sub_tree(root->children[0], scopedepth);
+    	instruction_add(POP, r3, NULL, 0, 0); // r3 <= expr
+    	instruction_add(NEG, r3, r3, 0, 0);
+    	instruction_add(PUSH, r3, NULL, 0, 0); // stack <= -expr
+    	return;
+	}
+	assert(root->n_children == 2);
+	/*binary expressions */
+	instruction_add(POP, r3, NULL, 0, 0); // r3 <= rhs
+	instruction_add(POP, r2, NULL, 0, 0); // r2 <= lhs
+	switch(root->expression_type.index){
+
         case ADD_E:
+        	instruction_add3(ADD, r0, r2, r3);
             break;
         
         case SUB_E:
+        	instruction_add3(SUB, r0, r2, r3);
             break;
             
         case MUL_E:
+        	instruction_add3(MUL, r0, r2, r3);
             break;
             
         case DIV_E:
+        	instruction_add3(DIV, r0, r2, r3);
             break;
             
         case LESS_E:
@@ -326,7 +350,13 @@ void gen_int_expression(node_t* root, int scopedepth)
             
         case NEQUAL_E:
             break;
+
+        default:
+        	assert(0);
+        	break;
     }
+	// post handling
+	instruction_add(PUSH, r0, NULL, 0, 0); // stack <= expr
 }
 
 //You are not required to implement this function/floating point functionality

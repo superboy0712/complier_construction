@@ -1,6 +1,18 @@
 VOID FUNC adding ()
 START
 	INT a;
+	INT b;
+	INT c;
 	a := 1 + 2;
-	PRINT a;
+	b := a +123;
+	a := a + a;
+	PRINT a, b;
+	PRINT -b;
+	PRINT b;
+	PRINT a + b;
+	PRINT a - (-b);
+	PRINT - (-b);
+	PRINT - (-b) + a;
+	c := a - (-b);
+	PRINT c;
 END
