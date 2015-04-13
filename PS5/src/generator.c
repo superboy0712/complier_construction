@@ -238,15 +238,17 @@ void gen_FUNCTION(node_t *root, int scopedepth) {
 			scopedepth);
 	scopedepth--;
 }
-
-void gen_ARRAY(int nDimensions, int* dimensions) {
-
-	/** allocate from outtermost dimension, pre-allocation, post-assignment */
+/**
+ *
+ * @param size in 4bytes
+ * @return on top of stack
+ */
+void gen_malloc( unsigned int size_in_words){
 	/* caller saves registers on stack */
 	instruction_add(STRING, STRDUP("\tpush\t{r1-r11}"), NULL, 0, 0);
 	/* caller pushes parameters on stack */
 	char const2str[50] = {0};
-	sprintf(const2str, "#%d", (dimensions[0])*4);
+	sprintf(const2str, "#%d", size_in_words*4);
 	instruction_add(MOVE32, r3, STRDUP(const2str), 0, 0);
 	instruction_add(PUSH, r3, NULL, 0, 0);
 	/* caller jumps to called function address */
@@ -257,11 +259,27 @@ void gen_ARRAY(int nDimensions, int* dimensions) {
 	instruction_add(STRING, STRDUP("\tpop\t{r1-r11}"), NULL, 0, 0);
 	/* use results, push the value/ptr on top of stack, assuming return value on r0 */
 	instruction_add(PUSH, r0, NULL, 0, 0);
-
-//	if(nDimensions!=1){
-//		gen_ARRAY(nDimensions-1, dimensions+1);
-//	}
-	nDimensions = 1;
+}
+void gen_ARRAY(int nDimensions, int* dimensions) {
+	/* generate myself */
+	gen_malloc(dimensions[0]);
+    if(nDimensions == 1){
+    	// finished
+    	return;
+    }else if(nDimensions < 1){
+    	assert(false);
+    }
+    /* nDimensions > 1*/
+    instruction_add(POP, r2, NULL, 0, 0);  /* r2 <= preivious dimension array head */
+    instruction_add(MOV, r3, STRDUP("#4"), 0, 0); /* for increase index offset */
+    for (int i = 0; i < dimensions[0]; ++i) {
+    	gen_ARRAY(nDimensions-1, dimensions+1);
+		/* assign the newly allocated to proper position */
+		instruction_add(POP, r0, NULL, 0, 0); /* r0 <= new allocate */
+		instruction_add(STR, r0, r2, 0, 0); /* [r2] <= r0 */
+		instruction_add3(ADD, r2, r2, r3);
+	}
+	instruction_add(PUSH, r2, NULL, 0, 0); /* put my address on top of stack */
 }
 void gen_DECLARATION_STATEMENT(node_t *root, int scopedepth) {
 	scopedepth++;
@@ -424,7 +442,7 @@ void gen_EXPRESSION(node_t *root, int scopedepth) {
 				gen_ARRAY(root->children[0]->data_type.n_dimensions,
 						root->children[0]->data_type.dimensions);
 			}else{
-				gen_default(root, scopedepth);
+				//possible class/type dynamic allocation
 			}
 		}
 		break;
