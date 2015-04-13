@@ -271,6 +271,7 @@ void gen_ARRAY(int nDimensions, int* dimensions) {
     }
     /* nDimensions > 1*/
     //instruction_add(POP, r2, NULL, 0, 0);  /* r2 <= preivious dimension array head */
+    //! why pop failed here?
     for (int i = 0; i < dimensions[0]; ++i) {
     	//instruction_add(STRING, STRDUP("\tpush\t{r1-r11}"), NULL, 0, 0);
     	gen_ARRAY(nDimensions-1, dimensions+1);
@@ -278,8 +279,8 @@ void gen_ARRAY(int nDimensions, int* dimensions) {
 		/* assign the newly allocated to proper position */
 		instruction_add(POP, r0, NULL, 0, 0); /* r0 <= new allocate */
 		instruction_add(POP, r2, NULL, 0, 0);  /* r2 <= preivious dimension array head */
-		instruction_add(STR, r0, r2, 0, 4*i); /* [r2] <= r0 */
-		instruction_add(PUSH, r2, NULL, 0, 0); /* put my address on top of stack */
+		instruction_add(STR, r0, r2, 0, 4*i); /* [r2 + 4i] <= r0 */
+		instruction_add(PUSH, r2, NULL, 0, 0); /* put old address on top of stack */
 	}
 }
 void gen_DECLARATION_STATEMENT(node_t *root, int scopedepth) {
