@@ -147,24 +147,16 @@ void gen_PROGRAM ( node_t *root, int scopedepth)
         instructions_print ( stdout );
 }
 
-
-
 void gen_FUNCTION ( node_t *root, int scopedepth )
 {
     gf(root, scopedepth);
      
 }
 
-
-
-
-
-
 void gen_DECLARATION_STATEMENT (node_t *root, int scopedepth)
 {
     gd(root, scopedepth);
 }
-
 
 void gen_PRINT_STATEMENT(node_t* root, int scopedepth)
 {
@@ -243,7 +235,6 @@ void gen_PRINT_STATEMENT(node_t* root, int scopedepth)
     
     tracePrint("Ending PRINT_STATEMENT\n");
 }
-
 
 void gen_EXPRESSION ( node_t *root, int scopedepth )
 {
@@ -390,8 +381,16 @@ void gen_int_expression(node_t* root, int scopedepth)
 //You are not required to implement this function/floating point functionality
 void gen_float_expression(node_t* root, int scopedepth)
 {
+	//gen_default(root, scopedepth);
+	if(root->expression_type.index == UMINUS_E){
+		/*unary expressions */
+    	gen_node(root->children[0], scopedepth);
+    	instruction_add(LOADS, sp, s0, 0, 0); // r3 <= expr
+    	instruction_add(STRING, STRDUP("\tVNEG.F32 \ts0, s0"), NULL, 0, 0);
+    	instruction_add(STORES, s0, sp, 0, 0); // stack <= -expr
+    	return;
+	}
 }
-
 
 void gen_bool_expression(node_t* root, int scopedepth)
 {
@@ -456,7 +455,6 @@ void gen_RETURN_STATEMENT ( node_t *root, int scopedepth )
 {
     gr(root, scopedepth);
 }
-
 
 void gen_WHILE_STATEMENT ( node_t *root, int scopedepth )
 {
