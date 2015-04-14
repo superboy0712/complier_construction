@@ -7,7 +7,7 @@
 
 /* Instructions */
 typedef enum {
-	COMMMENT, STRING, LABEL, NIL, MOVE32, // Pseudo opcodes
+	COMMMENT, STRING, LABEL, LABEL2, NIL, MOVE32, // Pseudo opcodes
 
 	PUSH, POP, MOV, LDR, STR, // Data movement
 	MOVGE, MOVGT, MOVLE, MOVLT, MOVEQ, MOVNE, // Conditional move

@@ -1,10 +1,11 @@
 VOID FUNC main()
 START
-	IF TRUE THEN
+	
+	IF 1 THEN
 		PRINT "true";
 	END
 	
-	IF FALSE THEN
+	IF 0 THEN
 		PRINT "false";
 	END
 END

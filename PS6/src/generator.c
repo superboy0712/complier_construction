@@ -456,6 +456,13 @@ void gen_RETURN_STATEMENT ( node_t *root, int scopedepth )
     gr(root, scopedepth);
 }
 
+char *NEW_label(char *name, int unique_key){
+	char *buffer = malloc(50);
+	char buff2[50];
+	sprintf(buff2, "%s_%d",name, unique_key);
+	sprintf(buffer, "_%s", buff2);
+	return buffer;
+}
 void gen_WHILE_STATEMENT ( node_t *root, int scopedepth )
 {
     tracePrint ( "Starting WHILE_STATEMENT\n");
@@ -472,8 +479,52 @@ void gen_FOR_STATEMENT ( node_t *root, int scopedepth )
 
 void gen_IF_STATEMENT ( node_t *root, int scopedepth )
 {
+	static int unique_key = 0;
+	int unique_key_in_my_scope;
+	/**
+	 * if statement
+	 * ::= IF expression THEN statement_list END
+	 * | IF expression THEN statement_list ELSE statement_list END
+	 */
     tracePrint ( "Starting IF_STATEMENT'\n");
-    
+    unique_key++;/* increase when ever enter, means invoked by new gen */
+    unique_key_in_my_scope = unique_key; /* protect in case of recursively nested */
+    /* evaluate expression */
+    assert(root->children[0]);
+    gen_node(root->children[0], scopedepth);
+    instruction_add(POP, r3, NULL, 0, 0);
+    instruction_add(MOV, r0, STRDUP("#0"), 0, 0);
+    /* compare to zero */
+    instruction_add(CMP, r3, r0, 0, 0);
+    if(root->n_children == 3){
+    	/* IF THEN ELSE */
+    	char *label_else = NEW_label("label_if_else", unique_key_in_my_scope);
+    	char *label_end = NEW_label("label_if_end", unique_key_in_my_scope);
+    	/* jump to label_else if zero */
+    	instruction_add(BEQ, STRDUP(label_else), NULL, 0, 0);
+    	/* code for if-part */
+    	gen_node(root->children[1], scopedepth);
+    	/* jump to end label */
+    	instruction_add(B, STRDUP(label_end), NULL, 0, 0);
+        /* else-label and code */
+    	instruction_add(LABEL2, STRDUP(label_else), NULL, 0, 0);
+    	gen_node(root->children[2], scopedepth);
+    	/* end-label*/
+    	instruction_add(LABEL2, STRDUP(label_end), NULL, 0, 0);
+    	free(label_else);
+    	free(label_end);
+    }else{
+    	/* IF - THEN */
+    	char *label_end = NEW_label("label_if_end", unique_key_in_my_scope);
+    	/* jump to label_end if zero */
+    	instruction_add(BEQ, STRDUP(label_end), NULL, 0, 0);
+    	/* code */
+    	gen_node(root->children[1], scopedepth);
+    	/* end-label*/
+		instruction_add(LABEL2, STRDUP(label_end), NULL, 0, 0);
+		free(label_end);
+    }
+
     tracePrint ( "End IF_STATEMENT\n");
 }
 
@@ -729,6 +780,9 @@ instructions_print ( FILE *stream )
                 break;
             case LABEL: 
                 fprintf ( stream, "_%s:\n", this->operands[0] );
+                break;
+            case LABEL2:
+                fprintf ( stream, "%s:\n", this->operands[0] );
                 break;
                 
             case B:
