@@ -465,15 +465,78 @@ char *NEW_label(char *name, int unique_key){
 }
 void gen_WHILE_STATEMENT ( node_t *root, int scopedepth )
 {
+	/**
+	 * while statement ::= WHILE expression DO statement list END
+	 */
     tracePrint ( "Starting WHILE_STATEMENT\n");
-    
+	static int unique_key = 0;
+	int unique_key_in_my_scope;
+    unique_key++;
+    unique_key_in_my_scope = unique_key;
+    char *start_label = NEW_label("label_while_start", unique_key_in_my_scope);
+    char *end_label = NEW_label("label_while_end", unique_key_in_my_scope);
+    /* start label */
+    instruction_add(LABEL2, STRDUP(start_label), NULL, 0, 0);
+    /* evaluation expression */
+    gen_node(root->children[0], scopedepth);
+    instruction_add(POP, r3, NULL, 0, 0);
+    instruction_add(MOV, r0, STRDUP("#0"), 0, 0);
+    /* compare to zero */
+    instruction_add(CMP, r3, r0, 0, 0);
+    /* jump to end label if zero */
+    instruction_add(BEQ, STRDUP(end_label), NULL, 0, 0);
+    /* body */
+    gen_node(root->children[1], scopedepth);
+    /* jump to start-label */
+    instruction_add(B, STRDUP(start_label), NULL, 0, 0);
+    /* end-label*/
+    instruction_add(LABEL2, STRDUP(end_label), NULL, 0, 0);
+    free(start_label);
+    free(end_label);
     tracePrint ( "End WHILE_STATEMENT\n");
 }
 
 void gen_FOR_STATEMENT ( node_t *root, int scopedepth )
 {
+	/**
+	 * FOR assignment statement TO expression DO statement list END
+	 */
     tracePrint ( "Starting FOR_STATEMENT\n");
-    
+	static int unique_key = 0;
+	int unique_key_in_my_scope;
+    unique_key++;
+    unique_key_in_my_scope = unique_key;
+    char *start_label = NEW_label("label_for_start", unique_key_in_my_scope);
+    char *end_label = NEW_label("label_for_end", unique_key_in_my_scope);
+    /* generate assignment init */
+    gen_node(root->children[0], scopedepth);
+    node_t *index = root->children[0]->children[0];
+    node_t *range_start = root->children[0]->children[1];
+    node_t *range_end = root->children[1];
+    gen_node(range_end, scopedepth);// stack <= range
+   // instruction_add(POP, r5, NULL, 0, 0); // r5 <= range
+    /* start label */
+    instruction_add(LABEL2, STRDUP(start_label), NULL, 0, 0);
+    /* evaluation expression */
+    range_start->int_const++; /* increase rvalue */
+    gen_node(root->children[0], scopedepth); /* assign again */
+    gen_node(index, scopedepth);
+    instruction_add(POP, r3, NULL, 0, 0); /* r3 <= new index */
+    instruction_add(POP, r5, NULL, 0, 0); // r5 <= range
+    //instruction_add3(ADD, r3, r3, STRDUP("#1"));
+
+    /* compare to range */
+    instruction_add(CMP, r3, r5, 0, 0);
+    /* jump to end label if equal */
+    instruction_add(BEQ, STRDUP(end_label), NULL, 0, 0);
+    /* body */
+    gen_node(root->children[2], scopedepth);
+    /* jump to start-label */
+    instruction_add(B, STRDUP(start_label), NULL, 0, 0);
+    /* end-label*/
+    instruction_add(LABEL2, STRDUP(end_label), NULL, 0, 0);
+    free(start_label);
+    free(end_label);
     tracePrint ( "End FOR_STATEMENT\n");
 }
 
@@ -795,7 +858,9 @@ instructions_print ( FILE *stream )
             case BNE:
                 fprintf ( stream, "\tbne\t%s\n", this->operands[0] );
                 break;
-                
+            case BGE:
+				fprintf ( stream, "\tbge\t%s\n", this->operands[0] );
+				break;
             case STRING:
                 fprintf ( stream, "%s\n", this->operands[0] );
                 break;

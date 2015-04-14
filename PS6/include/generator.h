@@ -19,7 +19,7 @@ typedef enum {
 	CVTSD,LOADS, STORES, FADD, FSUB, FMUL, FDIV, FCMP, MOVES, MOVED, FNEG,
 
 	//
-	LABEL2
+	LABEL2, BGE
 } opcode_t;
 
 /* A struct to make linked lists from instructions */
