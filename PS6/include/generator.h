@@ -7,7 +7,7 @@
 
 /* Instructions */
 typedef enum {
-	COMMMENT, STRING, LABEL, LABEL2, NIL, MOVE32, // Pseudo opcodes
+	COMMMENT, STRING, LABEL, NIL, MOVE32, // Pseudo opcodes
 
 	PUSH, POP, MOV, LDR, STR, // Data movement
 	MOVGE, MOVGT, MOVLE, MOVLT, MOVEQ, MOVNE, // Conditional move
@@ -16,7 +16,10 @@ typedef enum {
 	CMP, // Compare
 
 	// Floating point
-	CVTSD,LOADS, STORES, FADD, FSUB, FMUL, FDIV, FCMP, MOVES, MOVED, FNEG
+	CVTSD,LOADS, STORES, FADD, FSUB, FMUL, FDIV, FCMP, MOVES, MOVED, FNEG,
+
+	//
+	LABEL2
 } opcode_t;
 
 /* A struct to make linked lists from instructions */
