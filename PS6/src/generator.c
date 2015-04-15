@@ -511,26 +511,27 @@ void gen_FOR_STATEMENT ( node_t *root, int scopedepth )
     /* generate assignment init */
     gen_node(root->children[0], scopedepth);
     node_t *index = root->children[0]->children[0];
-    node_t *range_start = root->children[0]->children[1];
+    //node_t *range_start = root->children[0]->children[1];
     node_t *range_end = root->children[1];
-    gen_node(range_end, scopedepth);// stack <= range
-   // instruction_add(POP, r5, NULL, 0, 0); // r5 <= range
     /* start label */
     instruction_add(LABEL2, STRDUP(start_label), NULL, 0, 0);
+    gen_node(index, scopedepth);// stack <= index
+    gen_node(range_end, scopedepth);// stack <= range_end
+    instruction_add(POP, r5, NULL, 0, 0); // r5 <= range_end
     /* evaluation expression */
-    range_start->int_const++; /* increase rvalue */
-    gen_node(root->children[0], scopedepth); /* assign again */
-    gen_node(index, scopedepth);
-    instruction_add(POP, r3, NULL, 0, 0); /* r3 <= new index */
-    instruction_add(POP, r5, NULL, 0, 0); // r5 <= range
-    //instruction_add3(ADD, r3, r3, STRDUP("#1"));
-
-    /* compare to range */
+    instruction_add(POP, r3, NULL, 0, 0); // r3 <= index
+    /* compare index to range_end */
     instruction_add(CMP, r3, r5, 0, 0);
-    /* jump to end label if equal */
-    instruction_add(BEQ, STRDUP(end_label), NULL, 0, 0);
+    /* jump to end label if greater than or equal */
+    instruction_add(BGE, STRDUP(end_label), NULL, 0, 0);
     /* body */
     gen_node(root->children[2], scopedepth);
+    /* post increase index */
+	/* read index again in case r3 modified by body generation */
+	instruction_add(LDR, r3, fp, 0, index->entry->stack_offset);
+    instruction_add3(ADD, r3, r3, STRDUP("#1")); // increase range_start @r3
+	/* assign to index again */
+	instruction_add(STR, r3, fp, 0, index->entry->stack_offset);
     /* jump to start-label */
     instruction_add(B, STRDUP(start_label), NULL, 0, 0);
     /* end-label*/
