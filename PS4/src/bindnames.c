@@ -66,7 +66,11 @@ function_symbol_t* create_function_symbol(node_t* function_node)
 	 *   	-statement_list
 	 */
 	assert(function_node);
-	function_symbol_t *new_func_symbol = malloc(sizeof(function_symbol_t));
+	function_symbol_t *new_func_symbol = calloc(1, sizeof(function_symbol_t));
+	if(new_func_symbol == NULL){
+		perror("calloc");
+		exit(EXIT_FAILURE);
+	}
 	node_t *para_list = function_node->children[0];
 	if(para_list){
 		new_func_symbol->nArguments = para_list->n_children;
@@ -135,7 +139,7 @@ int bind_declaration ( node_t *root, int stackOffset)
 {
 	if(outputStage == 6)
 		printf( "DECLARATION: parameter/variable : '%s', offset: %d\n", root->label, stackOffset);
-	bind_default(root, stackOffset);
+	//bind_default(root, stackOffset);
 	symbol_t *new_symbol = create_symbol(root, stackOffset);
 	symbol_insert(new_symbol->label, new_symbol);
 	return 0;
@@ -144,15 +148,12 @@ int bind_declaration ( node_t *root, int stackOffset)
 int bind_variable ( node_t *root, int stackOffset)
 {
 	/**
-	 *  data_type.base = ARRAY_TYPE
-     *  data_type.array_type = INT_TYPE
-     *  data_type.n_dimensions = 1
-     *  data_type.dimensions = [2]
+	 * make sure it's masked in declaration part (symbol_insert)
+	 * here we retrieve (symbol_get)
 	 */
 	if(outputStage == 6)
 		printf( "VARIABLE: access: %s\n", root->label);
-	bind_default(root, stackOffset);
-
+	root->entry = symbol_get(root->label);
 	return 0;
 
 }
@@ -163,7 +164,6 @@ int bind_expression( node_t* root, int stackOffset)
 		printf( "EXPRESSION: Start: %s\n", root->expression_type.text);
 
 	bind_default(root, stackOffset);
-
 	if(outputStage == 6)
 		printf( "EXPRESSION: End\n");
 }
