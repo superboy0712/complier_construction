@@ -100,9 +100,10 @@ int bind_function_list ( node_t *root, int stackOffset)
 	 */
 	for(int i=0; i<root->n_children; i++){
 		function_symbol_t *new = create_function_symbol(root->children[i]);
-		function_add(STRDUP(root->children[i]->label), new);
-		bind_function(root->children[i], stackOffset);
+		function_add((root->children[i]->label), new);
+		//bind_function(root->children[i], stackOffset);
 	}
+	bind_default(root, stackOffset);
 	scope_remove();
 	if(outputStage == 6)
 		printf( "FUNCTION_LIST: End\n");
@@ -149,6 +150,7 @@ int bind_variable ( node_t *root, int stackOffset)
 {
 	/**
 	 * make sure it's masked in declaration part (symbol_insert)
+	 * and also masked out int call_e
 	 * here we retrieve (symbol_get)
 	 */
 	if(outputStage == 6)
@@ -162,10 +164,21 @@ int bind_expression( node_t* root, int stackOffset)
 {
 	if(outputStage == 6)
 		printf( "EXPRESSION: Start: %s\n", root->expression_type.text);
+	if(root->expression_type.index == FUNC_CALL_E){
+		/**
+		 * variable expression_list
+		 */
+		root->function_entry = function_get(root->children[0]->label);
+		if(root->children[1]){
+			bind_default(root->children[1], stackOffset);
+		}
+	}else{
+	   bind_default(root, stackOffset);
+	}
 
-	bind_default(root, stackOffset);
 	if(outputStage == 6)
 		printf( "EXPRESSION: End\n");
+	return 0;
 }
 
 
