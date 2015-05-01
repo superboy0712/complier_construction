@@ -32,10 +32,10 @@ int bind_function ( node_t *root, int stackOffset)
 		/**
 		 * para_list can be NULL after simplification
 		 */
-		int j = 8;
-		for (int i = para_list->n_children - 1; i >= 0; --i) {
+		int j = 8 + 4*(para_list->n_children-1);
+		for (int i = 0; i < para_list->n_children; ++i) {
 			bind_declaration(para_list->children[i], j);
-			j += 4;
+			j -= 4;
 		}
 	}
 	int j = -4;
