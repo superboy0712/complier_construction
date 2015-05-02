@@ -10,15 +10,6 @@ int bd(node_t* root, int stackOffset);
 int bind_default ( node_t *root, int stackOffset)
 {
 	return bd(root, stackOffset);
-//	if(!root)
-//		return -1;
-//
-//	for (int i = 0; i < root->n_children; ++i) {
-//		if(root->children[i]){
-//			root->children[i]->bind_names(root->children[i], stackOffset);
-//		}
-//	}
-//	return 0;
 }
 
 int bind_function ( node_t *root, int stackOffset)
@@ -151,8 +142,8 @@ int bind_declaration ( node_t *root, int stackOffset)
 int bind_variable ( node_t *root, int stackOffset)
 {
 	/**
-	 * make sure it's masked in declaration part (symbol_insert)
-	 * and also masked out int call_e
+	 * make sure it's masked out in declaration part (symbol_insert)
+	 * and also masked out int call_e (where func_symbol inserts)
 	 * here we retrieve (symbol_get)
 	 */
 	if(outputStage == 6)
