@@ -149,6 +149,8 @@ int bind_variable ( node_t *root, int stackOffset)
 	if(outputStage == 6)
 		printf( "VARIABLE: access: %s\n", root->label);
 	root->entry = symbol_get(root->label);
+	/* keep terminals(const and variable)' data_type field synchronized with entry */
+	root->data_type = root->entry->type;
 	return 0;
 
 }
