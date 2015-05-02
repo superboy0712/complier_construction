@@ -42,23 +42,10 @@ int bind_function ( node_t *root, int stackOffset)
 		 * para_list can be NULL after simplification
 		 */
 		stack_offset_of_variables = 8 + 4*para_list->n_children;
-		int j = 8 + 4*(para_list->n_children-1);
-		for (int i = 0; i < para_list->n_children; ++i) {
-			bind_declaration(para_list->children[i], j);
-			j -= 4;
-		}
+		bind_default(para_list, stack_offset_of_variables);
 	}
 	stack_offset_of_variables = 0;
-	int j = -4;
-	for (int i = 0; i < stat_list->n_children; ++i) {
-		if(stat_list->children[i]->nodetype.index == declaration_statement_n.index){
-			bind_declaration(stat_list->children[i], j);
-			j -= 4;
-		}else{
-			stat_list->children[i]->bind_names(stat_list->children[i], j);
-		}
-	}
-	//bind_default(stat_list, stack_offset_of_variables);
+	bind_default(stat_list, stack_offset_of_variables);
 	scope_remove();
 	if(outputStage == 6)
 		printf( "FUNCTION: End\n");
