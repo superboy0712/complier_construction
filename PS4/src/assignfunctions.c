@@ -103,9 +103,9 @@ void assignFunctionsToNodes ( node_t *root )
 		case VARIABLE:
 			root->typecheck = typecheck_variable;
 			break;
-//		case CONSTANT:
-//			root->typecheck = typecheck_expression;
-//			break;
+		case FUNCTION:
+			root->typecheck = typecheck_function_definition;
+			break;
 		default:
 			root->typecheck = typecheck_default;
 			break;

@@ -167,6 +167,10 @@ int bind_expression( node_t* root, int stackOffset)
 		if(root->children[1]){
 			bind_default(root->children[1], stackOffset);
 		}
+		/**
+		 * sychronize the date_type field like in variable
+		 */
+		root->data_type = root->function_entry->return_type;
 	}else{
 	   bind_default(root, stackOffset);
 	}

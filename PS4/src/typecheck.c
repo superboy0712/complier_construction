@@ -203,6 +203,42 @@ data_type_t typecheck_expression(node_t* root) {
 			break;
 
 		case FUNC_CALL_E:
+		{
+			/**
+			 * function_e access
+			 * call_e := variable expression_list
+			 */
+			/** check if calling expression compiant to definition */
+			int correct = 1;
+			if(root->children[1]){
+				if(root->function_entry->nArguments != root->children[1]->n_children){
+					// nArguments
+					correct = 0;
+					type_error(root);
+				}else if(correct){
+					// arguments types
+					for (int i = 0; i < root->children[1]->n_children; ++i) {
+						correct = !memcmp(&root->function_entry->argument_types[i],
+								&root->children[1]->children[i]->data_type,
+								sizeof(data_type_t));
+
+						if(!correct){
+							type_error(root);
+							break;
+						}
+					}
+				}
+			}
+			if(correct){
+				// return type
+				correct = !memcmp(&root->function_entry->return_type
+							, &root->data_type
+							,sizeof(data_type_t));
+				if(!correct){
+						type_error(root);
+				}
+			}
+		}
 			break;
 
 		case ARRAY_INDEX_E:
@@ -237,6 +273,34 @@ data_type_t typecheck_assignment(node_t* root) {
 	if (!equal_types(root->children[0]->data_type,
 			root->children[1]->data_type)) {
 		type_error(root);
+	}
+	return root->data_type;
+}
+data_type_t typecheck_function_definition(node_t* root){
+	assert(root->children[1]);
+	node_t *stat_list = root->children[1];
+	typecheck_default(root);
+	for (int i = 0; i < stat_list->n_children; ++i) {
+		if(root->children[i]){
+			if(root->nodetype.index == return_statement_n.index){
+				/**
+				 * return statement ::= RETURN expression
+				 *
+				 * checking if the return expression matches the definied function "head"
+				 */
+				//typecheck_default(root->children[i]);
+				assert(root->children[i]->n_children == 1);
+				assert(root->children[i]->children[0]);
+				if(memcmp(&root->data_type,
+						&root->children[i]->children[0]->data_type,
+						sizeof(data_type_t))){
+					type_error(root);
+					break;
+				}
+			}else{
+				//typecheck_sub_tree(root->children[i]);
+			}
+		}
 	}
 	return root->data_type;
 }
