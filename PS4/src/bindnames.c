@@ -2,7 +2,7 @@
 #include <assert.h>
 extern int outputStage; // This variable is located in vslc.c
 char* thisClass;
-
+static int stack_offset_of_variables = 0;
 //Solutions to last assignment, precompiled in bindsol.o
 int bc(node_t* root, int stackOffset);
 int bd(node_t* root, int stackOffset);
@@ -32,19 +32,21 @@ int bind_function ( node_t *root, int stackOffset)
 		/**
 		 * para_list can be NULL after simplification
 		 */
+		stack_offset_of_variables = 8 + 4*para_list->n_children;
 		int j = 8 + 4*(para_list->n_children-1);
 		for (int i = 0; i < para_list->n_children; ++i) {
 			bind_declaration(para_list->children[i], j);
 			j -= 4;
 		}
 	}
+	stack_offset_of_variables = 0;
 	int j = -4;
 	for (int i = 0; i < stat_list->n_children; ++i) {
 		if(stat_list->children[i]->nodetype.index == declaration_statement_n.index){
 			bind_declaration(stat_list->children[i], j);
 			j -= 4;
 		}else{
-			stat_list->children[i]->bind_names(stat_list->children[i], stackOffset);
+			stat_list->children[i]->bind_names(stat_list->children[i], j);
 		}
 	}
 	scope_remove();
@@ -141,7 +143,8 @@ int bind_declaration ( node_t *root, int stackOffset)
 	if(outputStage == 6)
 		printf( "DECLARATION: parameter/variable : '%s', offset: %d\n", root->label, stackOffset);
 	//bind_default(root, stackOffset);
-	symbol_t *new_symbol = create_symbol(root, stackOffset);
+	stack_offset_of_variables-=4;
+	symbol_t *new_symbol = create_symbol(root, stack_offset_of_variables);
 	symbol_insert(new_symbol->label, new_symbol);
 	return 0;
 }
@@ -166,7 +169,7 @@ int bind_expression( node_t* root, int stackOffset)
 		printf( "EXPRESSION: Start: %s\n", root->expression_type.text);
 	if(root->expression_type.index == FUNC_CALL_E){
 		/**
-		 * variable expression_list
+		 * call_e := variable expression_list
 		 */
 		root->function_entry = function_get(root->children[0]->label);
 		if(root->children[1]){
