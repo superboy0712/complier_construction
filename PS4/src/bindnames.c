@@ -10,6 +10,15 @@ int bd(node_t* root, int stackOffset);
 int bind_default ( node_t *root, int stackOffset)
 {
 	return bd(root, stackOffset);
+//	if(!root)
+//		return -1;
+//
+//	for (int i = 0; i < root->n_children; ++i) {
+//		if(root->children[i]){
+//			root->children[i]->bind_names(root->children[i], stackOffset);
+//		}
+//	}
+//	return 0;
 }
 
 int bind_function ( node_t *root, int stackOffset)
@@ -49,6 +58,7 @@ int bind_function ( node_t *root, int stackOffset)
 			stat_list->children[i]->bind_names(stat_list->children[i], j);
 		}
 	}
+	//bind_default(stat_list, stack_offset_of_variables);
 	scope_remove();
 	if(outputStage == 6)
 		printf( "FUNCTION: End\n");
@@ -140,10 +150,12 @@ symbol_t* create_symbol(node_t* declaration_node, int stackOffset)
 
 int bind_declaration ( node_t *root, int stackOffset)
 {
+	stack_offset_of_variables-=4;
+	stackOffset = stack_offset_of_variables;
 	if(outputStage == 6)
 		printf( "DECLARATION: parameter/variable : '%s', offset: %d\n", root->label, stackOffset);
 	//bind_default(root, stackOffset);
-	stack_offset_of_variables-=4;
+
 	symbol_t *new_symbol = create_symbol(root, stack_offset_of_variables);
 	symbol_insert(new_symbol->label, new_symbol);
 	return 0;
