@@ -14,6 +14,10 @@ void type_error(node_t* root) {
 		fprintf(stdout, "%s", root->nodetype.text);
 		if (root->nodetype.index == EXPRESSION) {
 			fprintf(stdout, " (%s)", root->expression_type.text);
+		}else{
+			if(root->label){
+				fprintf(stdout, " (%s)", root->label);
+			}
 		}
 		fprintf(stdout, "\n");
 	}
@@ -215,18 +219,22 @@ data_type_t typecheck_expression(node_t* root) {
 					// nArguments
 					correct = 0;
 					type_error(root);
-				}else if(correct){
+				}else {
 					// arguments types
 					for (int i = 0; i < root->children[1]->n_children; ++i) {
-						correct = !memcmp(&root->function_entry->argument_types[i],
+						if(memcmp(&root->function_entry->argument_types[i],
 								&root->children[1]->children[i]->data_type,
-								sizeof(data_type_t));
-
-						if(!correct){
+								sizeof(data_type_t))){
+							correct = 0;
 							type_error(root);
 							break;
 						}
 					}
+				}
+			}else{
+				if(root->function_entry->nArguments != 0){
+					correct = 0;
+					type_error(root);
 				}
 			}
 			if(correct){
@@ -235,7 +243,8 @@ data_type_t typecheck_expression(node_t* root) {
 							, &root->data_type
 							,sizeof(data_type_t));
 				if(!correct){
-						type_error(root);
+					correct = 0;
+					type_error(root);
 				}
 			}
 		}
@@ -277,23 +286,27 @@ data_type_t typecheck_assignment(node_t* root) {
 	return root->data_type;
 }
 data_type_t typecheck_function_definition(node_t* root){
+//	if (outputStage == 10) {
+//		printf("Type checking function definition %s\n", root->label);
+//	}
 	assert(root->children[1]);
 	node_t *stat_list = root->children[1];
 	typecheck_default(root);
 	for (int i = 0; i < stat_list->n_children; ++i) {
-		if(root->children[i]){
-			if(root->nodetype.index == return_statement_n.index){
+		if(stat_list->children[i]){
+			if(stat_list->children[i]->nodetype.index == return_statement_n.index){
 				/**
 				 * return statement ::= RETURN expression
 				 *
 				 * checking if the return expression matches the definied function "head"
 				 */
 				//typecheck_default(root->children[i]);
-				assert(root->children[i]->n_children == 1);
-				assert(root->children[i]->children[0]);
+				assert(stat_list->children[i]->n_children == 1);
+				assert(stat_list->children[i]->children[0]);
 				if(memcmp(&root->data_type,
-						&root->children[i]->children[0]->data_type,
+						&stat_list->children[i]->children[0]->data_type,
 						sizeof(data_type_t))){
+					type_error(stat_list->children[i]);
 					type_error(root);
 					break;
 				}
